@@ -41,57 +41,209 @@ with HAL.Touch_Panel;       use HAL.Touch_Panel;
 with STM32.User_Button;     use STM32;
 with BMP_Fonts;
 with LCD_Std_Out;
+with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
+with Ada.Numerics.Float_Random; use Ada.Numerics.Float_Random;
 
 procedure Main
 is
-   BG : Bitmap_Color := (Alpha => 255, others => 0);
-   Ball_Pos   : Point := (20, 280);
+    type Vector is
+        record
+            X : Float;
+            Y : Float;
+        end record;
+
+    type Object is
+        record
+            Position : Vector;
+            Speed : Vector;
+            Size : Vector;
+        end record;
+
+    VECTOR_UP : Vector      := (X => +0.0, Y => -1.0);
+    VECTOR_DOWN : Vector    := (X => +0.0, Y => +1.0);
+    VECTOR_LEFT : Vector    := (X => -1.0, Y => +0.0);
+    VECTOR_RIGHT : Vector   := (X => +1.0, Y => +0.0);
+
+    function "+"(Left, Right : Vector) return Vector is
+        O : Vector;
+    begin
+        O.X := Left.X + Right.X;
+        O.Y := Left.Y + Right.Y;
+        return O;
+    end "+";
+
+    function "-"(Left, Right : Vector) return Vector is
+        O : Vector;
+    begin
+        O.X := Left.X - Right.X;
+        O.Y := Left.Y - Right.Y;
+        return O;
+    end "-";
+
+    function "*"(Left : Vector; Scale : Float) return Vector is
+        O : Vector;
+    begin
+        O.X := Left.X * Scale;
+        O.Y := Left.Y * Scale;
+        return O;
+    end "*";
+
+    procedure swap(Left, Right : in out Vector) is
+        O : Vector;
+    begin
+        O := Left;
+        Left := Right;
+        Right := O;
+    end swap;
+
+    function Dot(A, B : Vector) return Float is
+    begin
+        return A.X * B.X + A.Y * B.Y;
+    end Dot;
+
+    function Magnitude(V : Vector) return Float is
+    begin
+        return Sqrt(Dot(V, V));
+    end Magnitude;
+
+    function Normalize(V : vector) return vector is
+        M : Float;
+    begin
+        M := 1.0 / Magnitude(V);
+        return V * M;
+    end Normalize;
+
+    function Reflect(I, N : Vector) return Vector is
+    begin
+        return I - N * (2.0 * Dot(N, I));
+    end Reflect;
+
+    function IsColliding(A, B : Object) return Boolean is
+    begin
+        if A.Position.X + A.Size.X < B.Position.X then
+            return false;
+        end if;
+
+        if A.Position.Y + A.Size.Y < B.Position.Y then
+            return false;
+        end if;
+
+        if A.Position.X > B.Position.X + B.Size.X then
+            return false;
+        end if;
+
+        if A.Position.Y > B.Position.Y + B.Size.Y then
+            return false;
+        end if;
+
+        return true;
+    end IsColliding;
+
+    function CollideScreen(A : Object) return Object is
+        O : Object;
+    begin
+        O := A;
+
+        if O.Position.X > 240.0 - O.Size.X then
+            O.Speed := Reflect(O.Speed, VECTOR_LEFT);
+        elsif O.Position.X <= O.Size.X then
+            O.Speed := Reflect(O.Speed, VECTOR_RIGHT);
+        end if;
+
+        if O.Position.Y > 315.0 - O.Size.X then
+            O.Speed := Reflect(O.Speed, VECTOR_UP);
+        elsif O.Position.Y <= O.Size.X then
+            O.Speed := Reflect(O.Speed, VECTOR_DOWN);
+        end if;
+
+        return O;
+    end CollideScreen;
+
+    procedure InitializeObject(R : in Ada.Numerics.Float_Random.Generator; O : in out Object) is
+    begin
+        O.Position.X := Ada.Numerics.Float_Random.Random(R) * 239.0 + 1.0;
+        O.Position.y := Ada.Numerics.Float_Random.Random(R) * 314.0 + 1.0;
+        O.Speed.X := Ada.Numerics.Float_Random.Random(R) * 2.0 - 1.0;
+        O.Speed.Y := Ada.Numerics.Float_Random.Random(R) * 2.0 - 1.0;
+
+        O.Speed := Normalize(O.Speed) * 2.0;
+        O.Size := ( X => 10.0, Y => 10.0);
+    end InitializeObject;
+
+    ObjectCount : constant Integer := 20;
+
+    Gen : Ada.Numerics.Float_Random.Generator;
+    BG : Bitmap_Color := (Alpha => 255, others => 0);
+
+    Objects : array(0 .. ObjectCount - 1) of Object;
+    Colors : array(0 .. 9) of Bitmap_Color := (
+        HAL.Bitmap.Red, HAL.Bitmap.Coral, HAL.Bitmap.Aqua,
+        HAL.Bitmap.Green, HAL.Bitmap.Gold, HAL.Bitmap.Teal,
+        HAL.Bitmap.Blue, HAL.Bitmap.Olive, HAL.Bitmap.Purple,
+        HAL.Bitmap.Brown
+    );
 begin
+    for i in Integer range 0 .. ObjectCount - 1 loop
+        InitializeObject(Gen, Objects(i));
+    end loop;
 
-   --  Initialize LCD
-   Display.Initialize;
-   Display.Initialize_Layer (1, ARGB_8888);
+    --  Initialize LCD
+    Display.Initialize;
+    Display.Initialize_Layer (1, ARGB_8888);
 
-   --  Initialize touch panel
-   Touch_Panel.Initialize;
+    --  Initialize touch panel
+    Touch_Panel.Initialize;
 
-   --  Initialize button
-   User_Button.Initialize;
+    --  Initialize button
+    User_Button.Initialize;
 
-   LCD_Std_Out.Set_Font (BMP_Fonts.Font8x8);
-   LCD_Std_Out.Current_Background_Color := BG;
+    LCD_Std_Out.Set_Font (BMP_Fonts.Font8x8);
+    LCD_Std_Out.Current_Background_Color := BG;
 
-   --  Clear LCD (set background)
-   Display.Hidden_Buffer (1).Set_Source (BG);
-   Display.Hidden_Buffer (1).Fill;
+    --  Clear LCD (set background)
+    Display.Hidden_Buffer (1).Set_Source (BG);
+    Display.Hidden_Buffer (1).Fill;
 
-   LCD_Std_Out.Clear_Screen;
-   Display.Update_Layer (1, Copy_Back => True);
+    LCD_Std_Out.Clear_Screen;
+    Display.Update_Layer (1, Copy_Back => True);
 
-   loop
-      if User_Button.Has_Been_Pressed then
-         BG := HAL.Bitmap.Dark_Orange;
-      end if;
+    loop
+        if User_Button.Has_Been_Pressed then
+            BG := HAL.Bitmap.Dark_Orange;
+        end if;
 
-      Display.Hidden_Buffer (1).Set_Source (BG);
-      Display.Hidden_Buffer (1).Fill;
+        Display.Hidden_Buffer (1).Set_Source (BG);
+        Display.Hidden_Buffer (1).Fill;
 
-      Display.Hidden_Buffer (1).Set_Source (HAL.Bitmap.Blue);
-      Display.Hidden_Buffer (1).Fill_Circle (Ball_Pos, 10);
+        for i in Integer range 0 .. ObjectCount - 1 loop
+            Display.Hidden_Buffer(1).Set_Source(Colors(i mod 10));
+            Display.Hidden_Buffer(1).Fill_Circle((
+                    Integer(Objects(i).Position.X),
+                    Integer(Objects(i).Position.Y)),
+                Integer(Objects(i).Size.X));
+            Objects(i) := CollideScreen(Objects(i));
+            Objects(i).Position := Objects(i).Position + Objects(i).Speed;
+
+            for j in Integer range 0 .. ObjectCount - 1 loop
+                if j /= i then
+                    if IsColliding(Objects(i), Objects(j)) then
+                        swap(Objects(i).Speed, Objects(j).Speed);
+                    end if;
+                end if;
+            end loop;
+        end loop;
 
 
-      declare
-         State : constant TP_State := Touch_Panel.Get_All_Touch_Points;
-      begin
-         case State'Length is
-            when 1 =>
-               Ball_Pos := (State (State'First).X, State (State'First).Y);
-            when others => null;
-         end case;
-      end;
-
-      --  Update screen
-      Display.Update_Layer (1, Copy_Back => True);
-
-   end loop;
+        --declare
+        --    State : constant TP_State := Touch_Panel.Get_All_Touch_Points;
+        --    begin
+        --        case State'Length is
+        --        when 1 =>
+        --            Ball_Pos := (State (State'First).X, State (State'First).Y);
+        --        when others => null;
+        --        end case;
+        --    end;
+        --  Update screen
+        Display.Update_Layer (1, Copy_Back => True);
+    end loop;
 end Main;
