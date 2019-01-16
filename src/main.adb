@@ -37,12 +37,10 @@ with Last_Chance_Handler;  pragma Unreferenced (Last_Chance_Handler);
 pragma Warnings (Off, "referenced");
 with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
 with Ada.Numerics.Float_Random; use Ada.Numerics.Float_Random;
-with BMP_Fonts;
-with HAL.Bitmap;            use HAL.Bitmap;
-with HAL.Touch_Panel;       use HAL.Touch_Panel;
-with LCD_Std_Out;
-with STM32.Board;           use STM32.Board;
-with STM32.User_Button;     use STM32;
+
+-- with STM32.Board;           use STM32.Board;
+-- with HAL.Touch_Panel;       use HAL.Touch_Panel;
+-- with STM32.User_Button;     use STM32;
 
 with Vec2; use Vec2;
 with Renderer;
@@ -54,40 +52,39 @@ is
 	-- Gen : Ada.Numerics.Float_Random.Generator;
 	-- type ObjectId is range 1 .. MAX_OBJ_COUNT;
 
-	procedure InitializeBoard is
-	begin
-		--  Initialize touch panel
-		Touch_Panel.Initialize;
+	-- procedure InitializeBoard is
+	-- begin
+	-- 	--  Initialize touch panel
+	-- 	Touch_Panel.Initialize;
 
-		--  Initialize button
-		User_Button.Initialize;
-	end InitializeBoard;
+	-- 	--  Initialize button
+	-- 	User_Button.Initialize;
+	-- end InitializeBoard;
 
 	switch : Boolean := false;
-	COLOR : Bitmap_Color := HAL.Bitmap.Blue;
 begin
 	Renderer.Initialize;
-	InitializeBoard;
+	-- InitializeBoard;
 
 	loop
 		-- if User_Button.Has_Been_Pressed then
 		-- 	color := HAL.Bitmap.Red;
 		-- end if;
 
-		declare
-		    State : constant TP_State := Touch_Panel.Get_All_Touch_Points;
-		begin
-			case State'Length is
-			when 0 =>
-				color := HAL.Bitmap.Blue;
-			when 1 =>
-				color := HAL.Bitmap.Green;
-	        	when others =>
-				color := HAL.Bitmap.Purple;
-			end case;
-		end;
+		-- declare
+		--     State : constant TP_State := Touch_Panel.Get_All_Touch_Points;
+		-- begin
+		-- 	case State'Length is
+		-- 	when 0 =>
+		-- 		color := HAL.Bitmap.Blue;
+		-- 	when 1 =>
+		-- 		color := HAL.Bitmap.Green;
+	        -- 	when others =>
+		-- 		color := HAL.Bitmap.Purple;
+		-- 	end case;
+		-- end;
 
-		Renderer.Fill(color);
+		Renderer.Clear;
 
 		for i in Renderer.CellId'Range loop
 			Renderer.DrawPlayer(i);
