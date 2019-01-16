@@ -24,16 +24,24 @@ package body Renderer is
 	end Fill;
 
 	procedure DrawEnemy(id : in CellId) is
+		X : Integer;
+		Y : Integer;
 	begin
+		Y := (Integer(id) - 1) / GRID_WIDTH;
+
+		if Y mod 2 = 0 then
+			X := GRID_WIDTH - ((Integer(id) - 1) mod GRID_WIDTH) - 1;
+			-- X := (Integer(id) - 1) mod GRID_WIDTH;
+		else
+			X := (Integer(id) - 1) mod GRID_WIDTH;
+		end if;
+
+		Y := Y * CELL_SIZE + SPRITE_SIZE;
+		X := X * CELL_SIZE + SPRITE_SIZE;
+
 		-- TODO: to replace with bitmap drawing
 		Display.Hidden_Buffer(1).Set_Source(HAL.Bitmap.Red);
-		Display.Hidden_Buffer(1).Fill_Circle(
-			(
-				((Integer(id) - 1) mod GRID_WIDTH) * CELL_SIZE + SPRITE_SIZE,
-				((Integer(id) - 1) / GRID_WIDTH)   * CELL_SIZE + SPRITE_SIZE
-			),
-			SPRITE_SIZE
-		);
+		Display.Hidden_Buffer(1).Fill_Circle((X, Y), SPRITE_SIZE);
 	end DrawEnemy;
 
 	procedure DrawPlayer(id : in CellId) is
