@@ -43,7 +43,7 @@ with Ada.Numerics.Float_Random; use Ada.Numerics.Float_Random;
 -- with STM32.User_Button;     use STM32;
 
 with Vec2; use Vec2;
-with Renderer;
+with Renderer; use Renderer;
 
 procedure Main
 is
@@ -61,36 +61,48 @@ is
 	-- 	User_Button.Initialize;
 	-- end InitializeBoard;
 
-	switch : Boolean := false;
+	type Entity is record
+		Pos : Renderer.CellId;
+	end record;
+
+	subtype Enemy is Entity;
+	subtype Player is Entity;
+
+	enemies : array(CellId range 1 .. 7) of Enemy;
+
+	procedure InitEnemies is
+	begin
+		for i in enemies'Range loop
+			enemies(i).Pos := i * 2;
+		end loop;
+	end InitEnemies;
+
+	procedure UpdateEnemies is
+	begin
+		for i in enemies'Range loop
+			enemies(i).Pos := (enemies(i).Pos mod Renderer.CellId'Last) + 1;
+		end loop;
+	end UpdateEnemies;
+
+	procedure DrawFrame is
+	begin
+		Renderer.Clear;
+		for i in enemies'Range loop
+			Renderer.DrawEnemy(enemies(i).Pos);
+		end loop;
+		Renderer.Flip;
+	end DrawFrame;
 begin
 	Renderer.Initialize;
 	-- InitializeBoard;
 
+	InitEnemies;
+
 	loop
-		-- if User_Button.Has_Been_Pressed then
-		-- 	color := HAL.Bitmap.Red;
-		-- end if;
 
-		-- declare
-		--     State : constant TP_State := Touch_Panel.Get_All_Touch_Points;
-		-- begin
-		-- 	case State'Length is
-		-- 	when 0 =>
-		-- 		color := HAL.Bitmap.Blue;
-		-- 	when 1 =>
-		-- 		color := HAL.Bitmap.Green;
-	        -- 	when others =>
-		-- 		color := HAL.Bitmap.Purple;
-		-- 	end case;
-		-- end;
+		UpdateEnemies;
+		DrawFrame;
 
-		Renderer.Clear;
-
-		for i in Renderer.CellId'Range loop
-			Renderer.DrawPlayer(i);
-		end loop;
-
-		-- Renderer.DrawPlayer(22);
-		Renderer.Flip;
+		delay 2.0;
 	end loop;
 end Main;
