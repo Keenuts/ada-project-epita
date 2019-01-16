@@ -1,3 +1,3 @@
 #!/bin/bash
 
-gprbuild -P prj.gpr
+gprbuild -XADL_BUILD=Debug -XADL_BUILD_CHECKS=Enabled -P prj.gpr
