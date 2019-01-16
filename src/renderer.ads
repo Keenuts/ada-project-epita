@@ -12,9 +12,7 @@ package Renderer is
 	type CellId is range 1 .. CELL_COUNT;
 
 	procedure Initialize;
-
-	--  Fills the backbuffer with the given color
-	procedure Fill(color : in Bitmap_Color);
+	procedure Clear;
 
 	-- Draw an enemy at the given position
 	procedure DrawEnemy(id : in CellId);
@@ -26,6 +24,9 @@ package Renderer is
 	procedure Flip;
 
 private
+
+	--  Fills the backbuffer with the given color
+	procedure Fill(color : in Bitmap_Color);
 
 	-- Display constants
 	SCREEN_WIDTH : constant Integer := 238;

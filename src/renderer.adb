@@ -11,6 +11,12 @@ package body Renderer is
 		LCD_Std_Out.Current_Background_Color := BACKGROUND_COLOR;
 	end Initialize;
 
+	procedure Clear is
+	begin
+		-- FIXME: choose background color
+		Fill(HAL.Bitmap.Black);
+	end Clear;
+
 	procedure Fill(color : in Bitmap_Color) is
 	begin
 		Display.Hidden_Buffer(1).Set_Source(color);
