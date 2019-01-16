@@ -43,80 +43,16 @@ with BMP_Fonts;
 with LCD_Std_Out;
 with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
 with Ada.Numerics.Float_Random; use Ada.Numerics.Float_Random;
+with Vec2; use Vec2;
 
 procedure Main
 is
-    type Vector is
-        record
-            X : Float;
-            Y : Float;
-        end record;
-
     type Object is
         record
             Position : Vector;
             Speed : Vector;
             Size : Vector;
         end record;
-
-    VECTOR_UP : Vector      := (X => +0.0, Y => -1.0);
-    VECTOR_DOWN : Vector    := (X => +0.0, Y => +1.0);
-    VECTOR_LEFT : Vector    := (X => -1.0, Y => +0.0);
-    VECTOR_RIGHT : Vector   := (X => +1.0, Y => +0.0);
-
-    function "+"(Left, Right : Vector) return Vector is
-        O : Vector;
-    begin
-        O.X := Left.X + Right.X;
-        O.Y := Left.Y + Right.Y;
-        return O;
-    end "+";
-
-    function "-"(Left, Right : Vector) return Vector is
-        O : Vector;
-    begin
-        O.X := Left.X - Right.X;
-        O.Y := Left.Y - Right.Y;
-        return O;
-    end "-";
-
-    function "*"(Left : Vector; Scale : Float) return Vector is
-        O : Vector;
-    begin
-        O.X := Left.X * Scale;
-        O.Y := Left.Y * Scale;
-        return O;
-    end "*";
-
-    procedure swap(Left, Right : in out Vector) is
-        O : Vector;
-    begin
-        O := Left;
-        Left := Right;
-        Right := O;
-    end swap;
-
-    function Dot(A, B : Vector) return Float is
-    begin
-        return A.X * B.X + A.Y * B.Y;
-    end Dot;
-
-    function Magnitude(V : Vector) return Float is
-    begin
-        return Sqrt(Dot(V, V));
-    end Magnitude;
-
-    function Normalize(V : vector) return vector is
-        M : Float;
-    begin
-        M := 1.0 / Magnitude(V);
-        return V * M;
-    end Normalize;
-
-    function Reflect(I, N : Vector) return Vector is
-    begin
-        return I - N * (2.0 * Dot(N, I));
-    end Reflect;
 
     function IsColliding(A, B : Object) return Boolean is
     begin
