@@ -10,7 +10,7 @@ package Renderer is
 
 	-- Display constants
 	SCREEN_WIDTH : constant Integer := 238;
-	SCREEN_HEIGHT : constant Integer := 357;
+	SCREEN_HEIGHT : constant Integer := 320;
 
 	-- Type Definition
 	type CellId is range 1 .. CELL_COUNT;
