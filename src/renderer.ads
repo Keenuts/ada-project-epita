@@ -14,6 +14,7 @@ package Renderer is
 
 	-- Type Definition
 	type CellId is range 1 .. CELL_COUNT;
+	type RangedPos is range 1 .. 100;
 
 	procedure Initialize;
 	procedure Clear;
@@ -22,7 +23,10 @@ package Renderer is
 	procedure DrawEnemy(id : in CellId);
 
 	-- Draw an player at the given position
-	procedure DrawPlayer(id : in CellId);
+	procedure DrawPlayer(id : in RangedPos);
+
+	-- Draw a particle at the given position
+	procedure DrawParticle(id : in RangedPos);
 
 	-- Flips back and front buffers. (~ CommitChangedToDisplay)
 	procedure Flip;

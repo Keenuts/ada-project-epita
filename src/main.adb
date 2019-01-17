@@ -53,9 +53,14 @@ is
 	type Entity is record
 		Pos : Renderer.CellId;
 	end record;
-
 	subtype EnemyEntity is Entity;
-	subtype PlayerEntity is Entity;
+
+	type RangedEntity is record
+		X : Renderer.RangedPos;
+		Y : Renderer.RangedPos;
+	end record;
+	subtype PlayerEntity is RangedEntity;
+	subtype ParticleEntity is RangedEntity;
 
 	MAX_ENEMY_COUNT : constant CellId := 7;
 	type EnemiesArray is array(CellId range 1 .. MAX_ENEMY_COUNT) of EnemyEntity;
@@ -77,8 +82,8 @@ is
 
 	procedure InitializeEnemies(ctx : in out GameAccess) is
 	begin
-	 	for i in ctx.enemies'Range loop
-	 		ctx.enemies(i).Pos := i * 2;
+		for I in ctx.enemies'Range loop
+			ctx.enemies(I).Pos := I * 2;
 	 	end loop;
 	end InitializeEnemies;
 

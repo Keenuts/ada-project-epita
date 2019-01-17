@@ -44,7 +44,7 @@ package body Renderer is
 		Display.Hidden_Buffer(1).Fill_Circle((X, Y), SPRITE_SIZE);
 	end DrawEnemy;
 
-	procedure DrawPlayer(id : in CellId) is
+	procedure DrawPlayer(id : in RangedPos) is
 	begin
 		Display.Hidden_Buffer(1).Set_Source(HAL.Bitmap.Yellow);
 		Display.Hidden_Buffer(1).Fill_Rect((
@@ -56,6 +56,12 @@ package body Renderer is
 			SPRITE_SIZE * 2
 		));
 	end DrawPlayer;
+
+	-- Draw a particle at the given position
+	procedure DrawParticle(id : in RangedPos) is
+	begin
+		null;
+	end DrawParticle;
 
 	procedure Flip is
 	begin
