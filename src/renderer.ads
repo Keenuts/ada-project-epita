@@ -34,8 +34,8 @@ package Renderer is
 	--  Fills the backbuffer with the given color
 	procedure Fill(color : in Bitmap_Color);
 
-private
 
+	-- size of 1 cell in pixels
 	CELL_SIZE : constant Integer := SCREEN_WIDTH / GRID_WIDTH;
 
 	-- ennemy sprite size in pixels
@@ -44,6 +44,9 @@ private
 	-- player sprite size in pixels
 	PLAYER_SIZE : constant Integer := 20;
 
+	-- particle sprite size in pixels
+	PARTICLE_SIZE : constant Integer := 5;
+private
 	BACKGROUND_COLOR : constant Bitmap_Color := (Alpha => 255, others => 0);
 
 end Renderer;

@@ -64,16 +64,20 @@ is
 
 	MAX_ENEMY_COUNT : constant CellId := 7;
 	type EnemiesArray is array(CellId range 1 .. MAX_ENEMY_COUNT) of EnemyEntity;
+
+	MAX_PARTICLE_COUNT : constant Natural := 10;
+	type ParticleArray is array(Natural range 1 .. MAX_PARTICLE_COUNT) of ParticleEntity;
 	
 	type GameContext is record
 		enemies : EnemiesArray;
+		particles : ParticleArray;
+		particleCount : Natural;
 		player : PlayerEntity;
 		score : Natural;
 	end record;
 	type GameAccess is access GameContext;
 
 	game : GameAccess := new GameContext;
-
 
 
 
@@ -108,6 +112,10 @@ is
 			Renderer.DrawEnemy(E.Pos);
 		end loop;
 
+		for I in 1 .. ctx.particleCount loop
+			Renderer.DrawParticle(ctx.particles(I).X, ctx.particles(I).Y);
+		end loop;
+
 		Renderer.DrawPlayer(ctx.player.X, ctx.player.Y);
 
 		Renderer.Flip;
@@ -128,8 +136,15 @@ is
 	end;
 
 	procedure MiddleTouch(game : in out GameAccess; Weight : in Natural) is
+		p : ParticleEntity := (game.player.X, game.player.Y);
 	begin
-		Renderer.Fill(HAL.Bitmap.Green);
+		if game.ParticleCount >= MAX_PARTICLE_COUNT - 1 then
+			return;
+		end if;
+
+		game.ParticleCount := game.ParticleCount + 1;
+		game.Particles(game.ParticleCount) := p;
+		Renderer.Fill(HAL.Bitmap.White);
 		Renderer.Flip;
 	end;
 begin

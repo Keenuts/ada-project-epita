@@ -65,7 +65,22 @@ package body Renderer is
 
 	-- Draw a particle at the given position
 	procedure DrawParticle(X, Y : in RangedPos) is
+		PY, PX : Float;
 	begin
+		-- project to frustrum-space coordinates
+		PX := Float(X) / Float(RangedPos'Last);
+		PY := Float(Y) / Float(RangedPos'Last);
+
+		-- transform to screen-space coordinates
+		PX := PX * Float(SCREEN_WIDTH - PARTICLE_SIZE);
+		PY := PY * Float(SCREEN_HEIGHT - PARTICLE_SIZE);
+
+		Display.Hidden_Buffer(1).Set_Source(HAL.Bitmap.Green);
+		Display.Hidden_Buffer(1).Fill_Rect((
+			( Natural(PX), Natural(PY) ),
+			PARTICLE_SIZE,
+			PARTICLE_SIZE
+		));
 		null;
 	end DrawParticle;
 
