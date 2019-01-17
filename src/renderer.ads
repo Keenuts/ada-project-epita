@@ -13,8 +13,8 @@ package Renderer is
 	SCREEN_HEIGHT : constant Integer := 320;
 
 	-- Type Definition
-	type CellId is range 1 .. CELL_COUNT;
-	type RangedPos is range 1 .. 100;
+	type CellId is range 1 .. CELL_COUNT with Default_Value => 1;
+	type RangedPos is range 1 .. 100 with Default_Value => 1;
 
 	procedure Initialize;
 	procedure Clear;
