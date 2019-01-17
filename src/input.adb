@@ -28,6 +28,7 @@ package body Input is
 	procedure Initialize is
 	begin
 		Touch_Panel.Initialize;
+		User_Button.Initialize;
 	end;
 
 	procedure FireEvent(e : Event; Weight : Natural) is
