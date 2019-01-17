@@ -117,6 +117,78 @@ is
 		end loop;
 	end UpdateEnemies;
 
+	function CollideAABB(A, B : in Rect) return Boolean is
+	begin
+		if A.Position.X + A.Width < B.Position.X then
+			return False;
+		end if;
+
+		if A.Position.Y + A.Height < B.Position.Y then
+			return False;
+		end if;
+
+		if A.Position.X > B.Position.X + B.Width then
+			return False;
+		end if;
+
+		if A.Position.Y > B.Position.Y + B.Height then
+			return False;
+		end if;
+
+		return True;
+	end CollideAABB;
+
+	function RangedEntityToAABB(E : in RangedEntity; Size : in Natural) return Rect is
+		PX, PY : Float;
+	begin
+		-- project to frustrum-space coordinates
+		PX := Float(E.X) / Float(RangedPos'Last);
+		PY := Float(E.Y) / Float(RangedPos'Last);
+		PX := PX * Float(SCREEN_WIDTH);
+		PY := PY * Float(SCREEN_HEIGHT);
+
+		return ((Natural(PX), Natural(PY)), Size, Size);
+	end RangedEntityToAABB;
+
+	function EnemyToAABB(E : in Entity) return Rect is
+		X, Y : Natural;
+	begin
+		X := (Natural(E.Pos) - 1) mod GRID_WIDTH;
+		Y := (Natural(E.Pos) - 1) / GRID_HEIGHT;
+		X := X * CELL_SIZE;
+		Y := Y * CELL_SIZE;
+		
+		-- FIXME: fix the radius render of the enemy.
+		return ((X, Y), CELL_SIZE, CELL_SIZE);
+	end EnemyToAABB;
+
+	function CollideParticle(ctx : in out GameAccess; P : in RangedEntity) return Boolean is
+		A, B : Rect;
+	begin
+		for E of ctx.enemies loop
+			if E.Alive then
+				A := EnemyToAABB(E);
+				B := RangedEntityToAABB(P, PARTICLE_SIZE);
+				if CollideAABB(A, B) then
+					E.Alive := False;
+					return True;
+				end if;
+			end if;
+		end loop;
+		return False;
+	end CollideParticle;
+
+	procedure CollideParticles(ctx : in out GameAccess) is
+	begin
+		for P of ctx.particles loop
+			if P.Alive then
+				if CollideParticle(ctx, P) then
+					P.Alive := False;
+				end if;
+			end if;
+		end loop;
+	end CollideParticles;
+
 	procedure UpdateParticles(ctx : in out GameAccess) is
 	begin
 		for P of ctx.particles loop
@@ -126,6 +198,7 @@ is
 				else
 					P.Y := P.Y - 1;
 				end if;
+
 			end if;
 		end loop;
 	end UpdateParticles;
