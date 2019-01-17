@@ -23,10 +23,10 @@ package Renderer is
 	procedure DrawEnemy(id : in CellId);
 
 	-- Draw an player at the given position
-	procedure DrawPlayer(id : in RangedPos);
+	procedure DrawPlayer(X, Y : in RangedPos);
 
 	-- Draw a particle at the given position
-	procedure DrawParticle(id : in RangedPos);
+	procedure DrawParticle(X, Y : in RangedPos);
 
 	-- Flips back and front buffers. (~ CommitChangedToDisplay)
 	procedure Flip;
