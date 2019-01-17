@@ -87,6 +87,12 @@ is
 	 	end loop;
 	end InitializeEnemies;
 
+	procedure InitializePlayer(ctx: in out GameAccess) is
+	begin
+		ctx.player.Y := Renderer.RangedPos'Last;
+		ctx.player.X := (Renderer.RangedPos'Last + Renderer.RangedPos'First) / 2;
+	end InitializePlayer;
+
 	procedure UpdateEnemies(ctx : in out GameAccess) is
 	begin
 		for E of ctx.enemies loop
@@ -102,22 +108,26 @@ is
 			Renderer.DrawEnemy(E.Pos);
 		end loop;
 
+		Renderer.DrawPlayer(ctx.player.X, ctx.player.Y);
+
 		Renderer.Flip;
 	end DrawFrame;
 
-	procedure RightTouch(unused : in out GameAccess; Weight : in Natural) is
+	procedure RightTouch(game : in out GameAccess; Weight : in Natural) is
 	begin
-		Renderer.Fill(HAL.Bitmap.Red);
-		Renderer.Flip;
+		if game.player.X < Renderer.RangedPos'Last then
+			game.player.X := game.player.X + 1;
+		end if;
 	end;
 
-	procedure LeftTouch(unused : in out GameAccess; Weight : in Natural) is
+	procedure LeftTouch(game : in out GameAccess; Weight : in Natural) is
 	begin
-		Renderer.Fill(HAL.Bitmap.Blue);
-		Renderer.Flip;
+		if game.player.X > Renderer.RangedPos'First then
+			game.player.X := game.player.X - 1;
+		end if;
 	end;
 
-	procedure MiddleTouch(unused : in out GameAccess; Weight : in Natural) is
+	procedure MiddleTouch(game : in out GameAccess; Weight : in Natural) is
 	begin
 		Renderer.Fill(HAL.Bitmap.Green);
 		Renderer.Flip;
@@ -128,6 +138,7 @@ begin
 	Timer_GameAccess.Initialize;
 
 	InitializeEnemies(game);
+	InitializePlayer(game);
 
 	Input_GameAccess.RegisterEvent(RIGHT_TOUCH, RightTouch'Access, game);
 	Input_GameAccess.RegisterEvent(LEFT_TOUCH, LeftTouch'Access, game);
