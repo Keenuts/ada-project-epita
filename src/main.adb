@@ -199,6 +199,13 @@ begin
 	Input_GameAccess.Initialize;
 	Timer_GameAccess.Initialize;
 
+	-- FIXME: initialize game correctly
+	-- Reset does not seem to reset the lastParticleSpawm var (maybe RAM is left)
+	game.lastParticleSpawn := clock;
+	For P of game.particles loop
+		P.Alive := False;
+	end loop;
+
 	InitializeEnemies(game);
 	InitializePlayer(game);
 
