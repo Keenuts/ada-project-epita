@@ -39,123 +39,101 @@ with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
 with Ada.Numerics.Float_Random; use Ada.Numerics.Float_Random;
 
 -- with STM32.Board;           use STM32.Board;
-with HAL.Touch_Panel;       use HAL.Touch_Panel;
 with HAL.Bitmap;
 -- with STM32.User_Button;     use STM32;
 
+with Ada.Real_Time; use Ada.Real_Time; -- for seconds
 with Vec2; use Vec2;
 with Renderer; use Renderer;
 with Input;
+with Timer;
 
 procedure Main
 is
-	-- MAX_OBJ_COUNT : constant Integer := 10; -- seems OK for now.
-	-- Cell : array(CellId) of ObjectId;
-	-- Gen : Ada.Numerics.Float_Random.Generator;
-	-- type ObjectId is range 1 .. MAX_OBJ_COUNT;
-
-	-- procedure InitializeBoard is
-	-- begin
-	-- 	--  Initialize touch panel
-	-- 	Touch_Panel.Initialize;
-
-	-- 	--  Initialize button
-	-- 	User_Button.Initialize;
-	-- end InitializeBoard;
-
 	type Entity is record
 		Pos : Renderer.CellId;
 	end record;
 
-	subtype Enemy is Entity;
-	subtype Player is Entity;
+	subtype EnemyEntity is Entity;
+	subtype PlayerEntity is Entity;
 
-	enemies : array(CellId range 1 .. 7) of Enemy;
+	MAX_ENEMY_COUNT : constant CellId := 7;
+	type EnemiesArray is array(CellId range 1 .. MAX_ENEMY_COUNT) of EnemyEntity;
+	
+	type GameContext is record
+		enemies : EnemiesArray;
+		player : PlayerEntity;
+		score : Natural;
+	end record;
+	type GameAccess is access GameContext;
 
-	procedure InitEnemies is
+	game : GameAccess := new GameContext;
+
+
+
+
+	package Input_GameAccess is new Input(GameContext, GameAccess); use Input_GameAccess;
+	package Timer_GameAccess is new Timer(GameContext, GameAccess); use Timer_GameAccess;
+
+	procedure InitializeEnemies(ctx : in out GameAccess) is
 	begin
-		for i in enemies'Range loop
-			enemies(i).Pos := i * 2;
-		end loop;
-	end InitEnemies;
+	 	for i in ctx.enemies'Range loop
+	 		ctx.enemies(i).Pos := i * 2;
+	 	end loop;
+	end InitializeEnemies;
 
-	procedure UpdateEnemies is
+	procedure UpdateEnemies(ctx : in out GameAccess) is
 	begin
-		for i in enemies'Range loop
-			enemies(i).Pos := (enemies(i).Pos mod Renderer.CellId'Last) + 1;
+		for E of ctx.enemies loop
+			E.Pos := (E.Pos mod Renderer.CellId'Last) + 1;
 		end loop;
 	end UpdateEnemies;
 
-	procedure DrawFrame is
+	procedure DrawFrame(ctx : in out GameAccess) is
 	begin
 		Renderer.Clear;
-		for i in enemies'Range loop
-			Renderer.DrawEnemy(enemies(i).Pos);
+
+		for E of ctx.enemies loop
+			Renderer.DrawEnemy(E.Pos);
 		end loop;
+
 		Renderer.Flip;
 	end DrawFrame;
-	switch : Boolean := false;
-	type Tamere is access Vector;
-	package Input_Vector is new Input(Vector, Tamere); use Input_Vector;
-	V : Tamere := null;
-	procedure RightTouch(toto : in out Tamere; Weight : in Natural) is
+
+	procedure RightTouch(unused : in out GameAccess; Weight : in Natural) is
 	begin
 		Renderer.Fill(HAL.Bitmap.Red);
 		Renderer.Flip;
 	end;
-	procedure LeftTouch(toto : in out Tamere; Weight : in Natural) is
+
+	procedure LeftTouch(unused : in out GameAccess; Weight : in Natural) is
 	begin
 		Renderer.Fill(HAL.Bitmap.Blue);
 		Renderer.Flip;
 	end;
-	procedure MiddleTouch(toto : in out Tamere; Weight : in Natural) is
+
+	procedure MiddleTouch(unused : in out GameAccess; Weight : in Natural) is
 	begin
 		Renderer.Fill(HAL.Bitmap.Green);
 		Renderer.Flip;
 	end;
 begin
 	Renderer.Initialize;
-	-- InitializeBoard;
+	Input_GameAccess.Initialize;
+	Timer_GameAccess.Initialize;
 
-	-- InitEnemies;
+	InitializeEnemies(game);
 
-	-- loop
+	Input_GameAccess.RegisterEvent(RIGHT_TOUCH, RightTouch'Access, game);
+	Input_GameAccess.RegisterEvent(LEFT_TOUCH, LeftTouch'Access, game);
+	Input_GameAccess.RegisterEvent(MIDDLE_TOUCH, MiddleTouch'Access, game);
 
-	-- 	UpdateEnemies;
-	-- 	DrawFrame;
+	Timer_GameAccess.RegisterInterval(Seconds(1), UpdateEnemies'Access, game);
 
-	-- 	delay 2.0;
-	Input_Vector.Initialize;
-	Renderer.Clear;
-	Input_Vector.RegisterEvent(RIGHT_TOUCH, RightTouch'Access, V);
-	Input_Vector.RegisterEvent(LEFT_TOUCH, LeftTouch'Access, V);
-	Input_Vector.RegisterEvent(MIDDLE_TOUCH, MiddleTouch'Access, V);
 	loop
-		Input_Vector.Trigger;
-		-- if User_Button.Has_Been_Pressed then
-		-- 	color := HAL.Bitmap.Red;
-		-- end if;
+		Input_GameAccess.Poll;
+		Timer_GameAccess.Poll;
 
-		-- declare
-		--     State : constant TP_State := Touch_Panel.Get_All_Touch_Points;
-		-- begin
-		-- 	case State'Length is
-		-- 	when 0 =>
-		-- 		color := HAL.Bitmap.Blue;
-		-- 	when 1 =>
-		-- 		color := HAL.Bitmap.Green;
-	        -- 	when others =>
-		-- 		color := HAL.Bitmap.Purple;
-		-- 	end case;
-		-- end;
-
-		-- Renderer.Clear;
-
-		-- for i in Renderer.CellId'Range loop
-		-- 	Renderer.DrawPlayer(i);
-		-- end loop;
-
-		-- -- Renderer.DrawPlayer(22);
-		-- Renderer.Flip;
+		DrawFrame(game);
 	end loop;
 end Main;
