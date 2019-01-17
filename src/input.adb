@@ -1,5 +1,6 @@
-with STM32.Board;     use STM32.Board;
-with HAL.Touch_Panel; use HAL.Touch_Panel;
+with STM32.Board;       use STM32.Board;
+with HAL.Touch_Panel;   use HAL.Touch_Panel;
+with STM32.User_Button; use STM32;
 with Renderer;
 
 package body Input is
@@ -15,14 +16,14 @@ package body Input is
 		null;
 	end Dummy_Callback;
 
-	procedure Trigger is
+	procedure Poll is
 		State : TP_State := Touch_Panel.Get_All_Touch_Points;
 	begin
 		for E of State loop
 			FireEvent(GetStateFromPosition(E.X, E.Y),
 				  E.Weight);
 		end loop;
-	end Trigger;
+	end Poll;
 
 	procedure Initialize is
 	begin
