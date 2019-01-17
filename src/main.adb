@@ -68,10 +68,14 @@ is
 	MAX_PARTICLE_COUNT : constant Natural := 10;
 	type ParticleArray is array(Natural range 1 .. MAX_PARTICLE_COUNT) of ParticleEntity;
 	
+	PARTICLE_FIRE_DELAY : constant Time_Span := Seconds(1);
 	type GameContext is record
 		enemies : EnemiesArray;
+
 		particles : ParticleArray;
 		particleCount : Natural;
+		lastParticleSpawn : Time;
+
 		player : PlayerEntity;
 		score : Natural;
 	end record;
@@ -138,12 +142,22 @@ is
 	procedure MiddleTouch(game : in out GameAccess; Weight : in Natural) is
 		p : ParticleEntity := (game.player.X, game.player.Y);
 	begin
+		-- particle instance count is limited
 		if game.ParticleCount >= MAX_PARTICLE_COUNT - 1 then
 			return;
 		end if;
 
+		-- particle fire rate is limited
+		if game.lastParticleSpawn + PARTICLE_FIRE_DELAY > clock then
+			return;
+		end if;
+
+		-- particle registration
 		game.ParticleCount := game.ParticleCount + 1;
 		game.Particles(game.ParticleCount) := p;
+		game.lastParticleSpawn := clock;
+
+		-- muzzle-flash effect
 		Renderer.Fill(HAL.Bitmap.White);
 		Renderer.Flip;
 	end;
