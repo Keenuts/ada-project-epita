@@ -38,8 +38,12 @@ private
 
 	CELL_SIZE : constant Integer := SCREEN_WIDTH / GRID_WIDTH;
 
-	-- sprite size in pixels
+	-- ennemy sprite size in pixels
 	SPRITE_SIZE : constant Integer := CELL_SIZE / 2;
+
+	-- player sprite size in pixels
+	PLAYER_SIZE : constant Integer := 20;
+
 	BACKGROUND_COLOR : constant Bitmap_Color := (Alpha => 255, others => 0);
 
 end Renderer;

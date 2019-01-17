@@ -52,14 +52,14 @@ package body Renderer is
 		PY := Float(Y) / Float(RangedPos'Last);
 
 		-- transform to screen-space coordinates
-		PX := PX * Float(SCREEN_WIDTH - SPRITE_SIZE * 2);
-		PY := PY * Float(SCREEN_HEIGHT - SPRITE_SIZE * 2);
+		PX := PX * Float(SCREEN_WIDTH - PLAYER_SIZE);
+		PY := PY * Float(SCREEN_HEIGHT - PLAYER_SIZE);
 
 		Display.Hidden_Buffer(1).Set_Source(HAL.Bitmap.Yellow);
 		Display.Hidden_Buffer(1).Fill_Rect((
 			( Natural(PX), Natural(PY) ),
-			SPRITE_SIZE * 2,
-			SPRITE_SIZE * 2
+			PLAYER_SIZE,
+			PLAYER_SIZE
 		));
 	end DrawPlayer;
 
