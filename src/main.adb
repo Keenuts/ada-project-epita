@@ -58,8 +58,10 @@ is
 	type RangedEntity is record
 		X : Renderer.RangedPos;
 		Y : Renderer.RangedPos;
+		Alive : Boolean;
 	end record;
 	subtype PlayerEntity is RangedEntity;
+
 	subtype ParticleEntity is RangedEntity;
 
 	MAX_ENEMY_COUNT : constant CellId := 7;
@@ -73,7 +75,6 @@ is
 		enemies : EnemiesArray;
 
 		particles : ParticleArray;
-		particleCount : Natural;
 		lastParticleSpawn : Time;
 
 		player : PlayerEntity;
@@ -99,6 +100,7 @@ is
 	begin
 		ctx.player.Y := Renderer.RangedPos'Last;
 		ctx.player.X := (Renderer.RangedPos'Last + Renderer.RangedPos'First) / 2;
+		ctx.player.Alive := True;
 	end InitializePlayer;
 
 	procedure UpdateEnemies(ctx : in out GameAccess) is
@@ -108,6 +110,19 @@ is
 		end loop;
 	end UpdateEnemies;
 
+	procedure UpdateParticles(ctx : in out GameAccess) is
+	begin
+		for P of ctx.particles loop
+			if P.Alive then
+				if P.Y = RangedPos'First then
+					P.Alive := False;
+				else
+					P.Y := P.Y - 1;
+				end if;
+			end if;
+		end loop;
+	end UpdateParticles;
+
 	procedure DrawFrame(ctx : in out GameAccess) is
 	begin
 		Renderer.Clear;
@@ -116,8 +131,10 @@ is
 			Renderer.DrawEnemy(E.Pos);
 		end loop;
 
-		for I in 1 .. ctx.particleCount loop
-			Renderer.DrawParticle(ctx.particles(I).X, ctx.particles(I).Y);
+		for P of ctx.particles loop
+			if P.Alive then
+				Renderer.DrawParticle(P.X, P.Y);
+			end if;
 		end loop;
 
 		Renderer.DrawPlayer(ctx.player.X, ctx.player.Y);
@@ -140,26 +157,23 @@ is
 	end;
 
 	procedure MiddleTouch(game : in out GameAccess; Weight : in Natural) is
-		p : ParticleEntity := (game.player.X, game.player.Y);
 	begin
-		-- particle instance count is limited
-		if game.ParticleCount >= MAX_PARTICLE_COUNT - 1 then
-			return;
-		end if;
-
 		-- particle fire rate is limited
 		if game.lastParticleSpawn + PARTICLE_FIRE_DELAY > clock then
 			return;
 		end if;
 
-		-- particle registration
-		game.ParticleCount := game.ParticleCount + 1;
-		game.Particles(game.ParticleCount) := p;
-		game.lastParticleSpawn := clock;
+		for P of game.particles loop
+			if not P.Alive then
+				P := (game.player.X, game.player.Y, True);
+				game.lastParticleSpawn := clock;
 
-		-- muzzle-flash effect
-		Renderer.Fill(HAL.Bitmap.White);
-		Renderer.Flip;
+				-- muzzle-flash effect
+				Renderer.Fill(HAL.Bitmap.White);
+				Renderer.Flip;
+				exit;
+			end if;
+		end loop;
 	end;
 begin
 	Renderer.Initialize;
@@ -174,6 +188,7 @@ begin
 	Input_GameAccess.RegisterEvent(MIDDLE_TOUCH, MiddleTouch'Access, game);
 
 	Timer_GameAccess.RegisterInterval(Seconds(1), UpdateEnemies'Access, game);
+	Timer_GameAccess.RegisterInterval(Milliseconds(50), UpdateParticles'Access, game);
 
 	loop
 		Input_GameAccess.Poll;
