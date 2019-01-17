@@ -50,8 +50,10 @@ with Timer;
 
 procedure Main
 is
+	-- FIXME: implement me as a class, and inherit with RangedEntity
 	type Entity is record
 		Pos : Renderer.CellId;
+		Alive : Boolean;
 	end record;
 	subtype EnemyEntity is Entity;
 
@@ -93,6 +95,7 @@ is
 	begin
 		for I in ctx.enemies'Range loop
 			ctx.enemies(I).Pos := I * 2;
+			ctx.enemies(I).Alive := True;
 	 	end loop;
 	end InitializeEnemies;
 
@@ -106,7 +109,9 @@ is
 	procedure UpdateEnemies(ctx : in out GameAccess) is
 	begin
 		for E of ctx.enemies loop
-			E.Pos := (E.Pos mod Renderer.CellId'Last) + 1;
+			if E.Alive then
+				E.Pos := (E.Pos mod Renderer.CellId'Last) + 1;
+			end if;
 		end loop;
 	end UpdateEnemies;
 
@@ -128,7 +133,9 @@ is
 		Renderer.Clear;
 
 		for E of ctx.enemies loop
-			Renderer.DrawEnemy(E.Pos);
+			if E.Alive then
+				Renderer.DrawEnemy(E.Pos);
+			end if;
 		end loop;
 
 		for P of ctx.particles loop
