@@ -8,6 +8,10 @@ package Renderer is
 	GRID_WIDTH : constant Integer := 7;
 	CELL_COUNT : constant Integer := GRID_WIDTH * GRID_HEIGHT;
 
+	-- Display constants
+	SCREEN_WIDTH : constant Integer := 238;
+	SCREEN_HEIGHT : constant Integer := 472;
+
 	-- Type Definition
 	type CellId is range 1 .. CELL_COUNT;
 
@@ -22,14 +26,12 @@ package Renderer is
 
 	-- Flips back and front buffers. (~ CommitChangedToDisplay)
 	procedure Flip;
-
-private
-
+	--
 	--  Fills the backbuffer with the given color
 	procedure Fill(color : in Bitmap_Color);
 
-	-- Display constants
-	SCREEN_WIDTH : constant Integer := 238;
+private
+
 	CELL_SIZE : constant Integer := SCREEN_WIDTH / GRID_WIDTH;
 
 	-- sprite size in pixels

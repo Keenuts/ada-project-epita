@@ -39,11 +39,13 @@ with Ada.Numerics.Elementary_Functions; use Ada.Numerics.Elementary_Functions;
 with Ada.Numerics.Float_Random; use Ada.Numerics.Float_Random;
 
 -- with STM32.Board;           use STM32.Board;
--- with HAL.Touch_Panel;       use HAL.Touch_Panel;
+with HAL.Touch_Panel;       use HAL.Touch_Panel;
+with HAL.Bitmap;
 -- with STM32.User_Button;     use STM32;
 
 with Vec2; use Vec2;
 with Renderer; use Renderer;
+with Input;
 
 procedure Main
 is
@@ -92,17 +94,68 @@ is
 		end loop;
 		Renderer.Flip;
 	end DrawFrame;
+	switch : Boolean := false;
+	type Tamere is access Vector;
+	package Input_Vector is new Input(Vector, Tamere); use Input_Vector;
+	V : Tamere := null;
+	procedure RightTouch(toto : in out Tamere; Weight : in Natural) is
+	begin
+		Renderer.Fill(HAL.Bitmap.Red);
+		Renderer.Flip;
+	end;
+	procedure LeftTouch(toto : in out Tamere; Weight : in Natural) is
+	begin
+		Renderer.Fill(HAL.Bitmap.Blue);
+		Renderer.Flip;
+	end;
+	procedure MiddleTouch(toto : in out Tamere; Weight : in Natural) is
+	begin
+		Renderer.Fill(HAL.Bitmap.Green);
+		Renderer.Flip;
+	end;
 begin
 	Renderer.Initialize;
 	-- InitializeBoard;
 
-	InitEnemies;
+	-- InitEnemies;
 
+	-- loop
+
+	-- 	UpdateEnemies;
+	-- 	DrawFrame;
+
+	-- 	delay 2.0;
+	Input_Vector.Initialize;
+	Renderer.Clear;
+	Input_Vector.RegisterEvent(RIGHT_TOUCH, RightTouch'Access, V);
+	Input_Vector.RegisterEvent(LEFT_TOUCH, LeftTouch'Access, V);
+	Input_Vector.RegisterEvent(MIDDLE_TOUCH, MiddleTouch'Access, V);
 	loop
+		Input_Vector.Trigger;
+		-- if User_Button.Has_Been_Pressed then
+		-- 	color := HAL.Bitmap.Red;
+		-- end if;
 
-		UpdateEnemies;
-		DrawFrame;
+		-- declare
+		--     State : constant TP_State := Touch_Panel.Get_All_Touch_Points;
+		-- begin
+		-- 	case State'Length is
+		-- 	when 0 =>
+		-- 		color := HAL.Bitmap.Blue;
+		-- 	when 1 =>
+		-- 		color := HAL.Bitmap.Green;
+	        -- 	when others =>
+		-- 		color := HAL.Bitmap.Purple;
+		-- 	end case;
+		-- end;
 
-		delay 2.0;
+		-- Renderer.Clear;
+
+		-- for i in Renderer.CellId'Range loop
+		-- 	Renderer.DrawPlayer(i);
+		-- end loop;
+
+		-- -- Renderer.DrawPlayer(22);
+		-- Renderer.Flip;
 	end loop;
 end Main;
