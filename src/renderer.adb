@@ -45,13 +45,19 @@ package body Renderer is
 	end DrawEnemy;
 
 	procedure DrawPlayer(X, Y : in RangedPos) is
+		PY, PX : Float;
 	begin
+		-- project to frustrum-space coordinates
+		PX := Float(X) / Float(RangedPos'Last);
+		PY := Float(Y) / Float(RangedPos'Last);
+
+		-- transform to screen-space coordinates
+		PX := PX * Float(SCREEN_WIDTH - SPRITE_SIZE * 2);
+		PY := PY * Float(SCREEN_HEIGHT - SPRITE_SIZE * 2);
+
 		Display.Hidden_Buffer(1).Set_Source(HAL.Bitmap.Yellow);
 		Display.Hidden_Buffer(1).Fill_Rect((
-			(
-				((Integer(X) - 1) mod GRID_WIDTH) * CELL_SIZE,
-				((Integer(X) - 1) / GRID_WIDTH)   * CELL_SIZE
-			),
+			( Natural(PX), Natural(PY) ),
 			SPRITE_SIZE * 2,
 			SPRITE_SIZE * 2
 		));
