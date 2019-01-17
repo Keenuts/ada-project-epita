@@ -18,17 +18,10 @@ package body Input is
 	procedure Trigger is
 		State : TP_State := Touch_Panel.Get_All_Touch_Points;
 	begin
-		if State'Length > 0 then
-			for E in State'Range loop
-				FireEvent(GetStateFromPosition(State(E).X, State(E).Y),
-					  State(E).Weight);
-			end loop;
-			-- FireEvent(GetStateFromPosition(State(1).X, State(1).Y), State(1).Weight);
-			-- for E of State loop
-			-- 	null;
-			-- 	-- FireEvent(GetStateFromPosition(E.X, E.Y));
-			-- end loop;
-		end if;
+		for E of State loop
+			FireEvent(GetStateFromPosition(E.X, E.Y),
+				  E.Weight);
+		end loop;
 	end Trigger;
 
 	procedure Initialize is
