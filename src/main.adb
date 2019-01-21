@@ -50,139 +50,15 @@ with Renderer; use Renderer;
 with Input;
 with Timer;
 with Entity; use Entity;
+with Game; use Game;
+with Collision; use Collision;
 
 procedure Main
 is
-	MAX_ENEMY_COUNT : constant CellId := 7;
-	type EnemiesArray is array(CellId range 1 .. MAX_ENEMY_COUNT) of Enemy;
-
-	MAX_PARTICLE_COUNT : constant Natural := 10;
-	type ParticleArray is array(Natural range 1 .. MAX_PARTICLE_COUNT) of Particle;
-	
-	PARTICLE_FIRE_DELAY : constant Time_Span := Seconds(1);
-	type GameContext is record
-		enemies : EnemiesArray;
-
-		particles : ParticleArray;
-		lastParticleSpawn : Time;
-
-		player : Entity.Player;
-		score : Natural;
-	end record;
-	type GameAccess is access GameContext;
-
 	game : GameAccess := new GameContext;
-
-
 
 	package Input_GameAccess is new Input(GameContext, GameAccess); use Input_GameAccess;
 	package Timer_GameAccess is new Timer(GameContext, GameAccess); use Timer_GameAccess;
-
-	procedure InitializeEnemies(ctx : in out GameAccess) is
-	begin
-		for I in ctx.enemies'Range loop
-			ctx.enemies(I) := (True, I * 2);
-	 	end loop;
-	end InitializeEnemies;
-
-	procedure InitializePlayer(ctx: in out GameAccess) is
-	begin
-		ctx.player.Y := Renderer.RangedPos'Last;
-		ctx.player.X := (Renderer.RangedPos'Last + Renderer.RangedPos'First) / 2;
-		ctx.player.Alive := True;
-	end InitializePlayer;
-
-	procedure UpdateEnemies(ctx : in out GameAccess) is
-	begin
-		for E of ctx.enemies loop
-			if E.Alive then
-				E.Pos := (E.Pos mod Renderer.CellId'Last) + 1;
-			end if;
-		end loop;
-	end UpdateEnemies;
-
-	function CollideAABB(A, B : in Rect) return Boolean is
-	begin
-		if A.Position.X + A.Width < B.Position.X then
-			return False;
-		end if;
-
-		if A.Position.Y + A.Height < B.Position.Y then
-			return False;
-		end if;
-
-		if A.Position.X > B.Position.X + B.Width then
-			return False;
-		end if;
-
-		if A.Position.Y > B.Position.Y + B.Height then
-			return False;
-		end if;
-
-		return True;
-	end CollideAABB;
-
-	function CollideParticle(ctx : in out GameAccess; P : in RangedEntity'Class) return Boolean is
-		A, B : Rect;
-	begin
-		for E of ctx.enemies loop
-			if E.Alive then
-				A := E.getAABB;
-				B := P.getAABB;
-				if CollideAABB(A, B) then
-					E.Alive := False;
-					return True;
-				end if;
-			end if;
-		end loop;
-		return False;
-	end CollideParticle;
-
-	procedure CollideParticles(ctx : in out GameAccess) is
-	begin
-		for P of ctx.particles loop
-			if P.Alive then
-				if CollideParticle(ctx, P) then
-					P.Alive := False;
-				end if;
-			end if;
-		end loop;
-	end CollideParticles;
-
-	procedure UpdateParticles(ctx : in out GameAccess) is
-	begin
-		for P of ctx.particles loop
-			if P.Alive then
-				if P.Y = RangedPos'First then
-					P.Alive := False;
-				else
-					P.Y := P.Y - 1;
-				end if;
-
-			end if;
-		end loop;
-	end UpdateParticles;
-
-	procedure DrawFrame(ctx : in out GameAccess) is
-	begin
-		Renderer.Clear;
-
-		for E of ctx.enemies loop
-			if E.Alive then
-				Renderer.DrawEnemy(E.Pos);
-			end if;
-		end loop;
-
-		for P of ctx.particles loop
-			if P.Alive then
-				Renderer.DrawParticle(P.X, P.Y);
-			end if;
-		end loop;
-
-		Renderer.DrawPlayer(ctx.player.X, ctx.player.Y);
-
-		Renderer.Flip;
-	end DrawFrame;
 
 	procedure RightTouch(game : in out GameAccess; Weight : in Natural) is
 	begin
@@ -232,15 +108,7 @@ begin
 	Input_GameAccess.Initialize;
 	Timer_GameAccess.Initialize;
 
-	-- FIXME: initialize game correctly
-	-- Reset does not seem to reset the lastParticleSpawm var (maybe RAM is left)
-	game.lastParticleSpawn := clock;
-	For P of game.particles loop
-		P.Alive := False;
-	end loop;
-
-	InitializeEnemies(game);
-	InitializePlayer(game);
+	game.Initialize;
 
 	Input_GameAccess.RegisterEvent(RIGHT_TOUCH, RightTouch'Access, game);
 	Input_GameAccess.RegisterEvent(LEFT_TOUCH, LeftTouch'Access, game);
@@ -254,7 +122,7 @@ begin
 		Timer_GameAccess.Poll;
 
 		CollideParticles(game);
-		DrawFrame(game);
+		game.DrawFrame;
 	end loop;
 exception
 	when Error: others =>
