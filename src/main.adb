@@ -49,30 +49,15 @@ with Vec2; use Vec2;
 with Renderer; use Renderer;
 with Input;
 with Timer;
+with Entity; use Entity;
 
 procedure Main
 is
-	-- FIXME: implement me as a class, and inherit with RangedEntity
-	type Entity is record
-		Pos : Renderer.CellId;
-		Alive : Boolean;
-	end record;
-	subtype EnemyEntity is Entity;
-
-	type RangedEntity is record
-		X : Renderer.RangedPos;
-		Y : Renderer.RangedPos;
-		Alive : Boolean;
-	end record;
-	subtype PlayerEntity is RangedEntity;
-
-	subtype ParticleEntity is RangedEntity;
-
 	MAX_ENEMY_COUNT : constant CellId := 7;
-	type EnemiesArray is array(CellId range 1 .. MAX_ENEMY_COUNT) of EnemyEntity;
+	type EnemiesArray is array(CellId range 1 .. MAX_ENEMY_COUNT) of Enemy;
 
 	MAX_PARTICLE_COUNT : constant Natural := 10;
-	type ParticleArray is array(Natural range 1 .. MAX_PARTICLE_COUNT) of ParticleEntity;
+	type ParticleArray is array(Natural range 1 .. MAX_PARTICLE_COUNT) of Particle;
 	
 	PARTICLE_FIRE_DELAY : constant Time_Span := Seconds(1);
 	type GameContext is record
@@ -81,7 +66,7 @@ is
 		particles : ParticleArray;
 		lastParticleSpawn : Time;
 
-		player : PlayerEntity;
+		player : Entity.Player;
 		score : Natural;
 	end record;
 	type GameAccess is access GameContext;
@@ -96,8 +81,7 @@ is
 	procedure InitializeEnemies(ctx : in out GameAccess) is
 	begin
 		for I in ctx.enemies'Range loop
-			ctx.enemies(I).Pos := I * 2;
-			ctx.enemies(I).Alive := True;
+			ctx.enemies(I) := (True, I * 2);
 	 	end loop;
 	end InitializeEnemies;
 
@@ -138,37 +122,13 @@ is
 		return True;
 	end CollideAABB;
 
-	function RangedEntityToAABB(E : in RangedEntity; Size : in Natural) return Rect is
-		PX, PY : Float;
-	begin
-		-- project to frustrum-space coordinates
-		PX := Float(E.X) / Float(RangedPos'Last);
-		PY := Float(E.Y) / Float(RangedPos'Last);
-		PX := PX * Float(SCREEN_WIDTH);
-		PY := PY * Float(SCREEN_HEIGHT);
-
-		return ((Natural(PX), Natural(PY)), Size, Size);
-	end RangedEntityToAABB;
-
-	function EnemyToAABB(E : in Entity) return Rect is
-		X, Y : Natural;
-	begin
-		X := (Natural(E.Pos) - 1) mod GRID_WIDTH;
-		Y := (Natural(E.Pos) - 1) / GRID_HEIGHT;
-		X := X * CELL_SIZE;
-		Y := Y * CELL_SIZE;
-		
-		-- FIXME: fix the radius render of the enemy.
-		return ((X, Y), CELL_SIZE, CELL_SIZE);
-	end EnemyToAABB;
-
-	function CollideParticle(ctx : in out GameAccess; P : in RangedEntity) return Boolean is
+	function CollideParticle(ctx : in out GameAccess; P : in RangedEntity'Class) return Boolean is
 		A, B : Rect;
 	begin
 		for E of ctx.enemies loop
 			if E.Alive then
-				A := EnemyToAABB(E);
-				B := RangedEntityToAABB(P, PARTICLE_SIZE);
+				A := E.getAABB;
+				B := P.getAABB;
 				if CollideAABB(A, B) then
 					E.Alive := False;
 					return True;
@@ -247,7 +207,7 @@ is
 
 		for P of game.particles loop
 			if not P.Alive then
-				P := (game.player.X, game.player.Y, True);
+				P := (True, game.player.X, game.player.Y);
 				game.lastParticleSpawn := clock;
 
 				-- muzzle-flash effect
