@@ -24,6 +24,7 @@ with Collision; use Collision;
 procedure Main
 is
 	game : GameAccess := new GameContext;
+	Started : Boolean := False;
 
 	package Input_GameAccess is new Input(GameContext, GameAccess); use Input_GameAccess;
 	package Timer_GameAccess is new Timer(GameContext, GameAccess); use Timer_GameAccess;
@@ -42,17 +43,44 @@ is
 	begin
 		game.FireParticle;
 	end;
+
+	procedure UserButton(game : in out GameAccess; Weight : in Natural) is
+	begin
+		Started := True;
+	end;
+
+	procedure Draw_Menu is
+	begin
+		renderer.Clear;
+		renderer.Draw_Splash;
+
+		renderer.Draw_Enemy(25, 50);
+		renderer.Draw_Enemy(40, 60);
+		renderer.Draw_Particle(50, 80);
+		renderer.Draw_Player(50, 100);
+
+		renderer.Flip;
+	end;
 begin
+	game.Initialize;
 	Renderer.Initialize;
 	Input_GameAccess.Initialize;
-	Timer_GameAccess.Initialize;
 
-	game.Initialize;
+	Input_GameAccess.RegisterEvent(BUTTON,		UserButton'Access, game);
+	Input_GameAccess.RegisterEvent(RIGHT_TOUCH,	UserButton'Access, game);
+	Input_GameAccess.RegisterEvent(LEFT_TOUCH,	UserButton'Access, game);
+	Input_GameAccess.RegisterEvent(MIDDLE_TOUCH,	UserButton'Access, game);
 
+	while not Started loop
+		Input_GameAccess.Poll;
+		Draw_Menu;
+	end loop;
+		
 	Input_GameAccess.RegisterEvent(RIGHT_TOUCH, RightTouch'Access, game);
 	Input_GameAccess.RegisterEvent(LEFT_TOUCH, LeftTouch'Access, game);
 	Input_GameAccess.RegisterEvent(MIDDLE_TOUCH, MiddleTouch'Access, game);
 
+	Timer_GameAccess.Initialize;
 	Timer_GameAccess.RegisterInterval(Milliseconds(250), UpdateEnemies'Access, game);
 	Timer_GameAccess.RegisterInterval(Milliseconds(10), UpdateParticles'Access, game);
 
