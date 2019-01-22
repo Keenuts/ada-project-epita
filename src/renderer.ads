@@ -19,7 +19,7 @@ is
 		-- img size: 8X8
 		-- img depth: 4 bytes / BGRA
 
-	SPRITE_SIZE : constant Natural := 8;
+	SPRITE_SIZE : constant Positive := 8;
 	type Sprite is array(unsigned) of aliased Interfaces.Unsigned_8;
 	type Sprite_Access is not null access constant Sprite;
 
@@ -82,7 +82,12 @@ is
 	type CellId is range 1 .. CELL_COUNT with Default_Value => 1;
 	type RangedPos is range 1 .. 100 with Default_Value => 1;
 
+	-- Initialize thr STM32 and loads sprites
 	procedure Initialize;
+
+	--  Fills the backbuffer with the given color
+	procedure Fill(color : in Bitmap_Color);
+
 	procedure Clear;
 
 	-- Draw an enemy at the given position
@@ -96,9 +101,6 @@ is
 
 	-- Flips back and front buffers. (~ CommitChangedToDisplay)
 	procedure Flip;
-	--
-	--  Fills the backbuffer with the given color
-	procedure Fill(color : in Bitmap_Color);
 
 
 	-- size of 1 cell in pixels
@@ -109,13 +111,10 @@ private
 	BACKGROUND_COLOR : constant Bitmap_Color := (Alpha => 255, others => 0);
 
 	function Sample_Sprite(
-		Img : in Sprite_Access;
+		Source : in Sprite_Access;
 		X : in Float;
 		Y : in Float
-	) return UInt8
-		with Pre =>  X >= 0.0 and then X <= 1.0 and then
-			Y >= 0.0 and then Y <= 1.0,
-			Post => Sample_Sprite'Result >= 0 and then Sample_Sprite'Result < 1;
+	) return UInt8;
 
 	procedure Load_Sprite(
 		Source     : in Sprite_Access;

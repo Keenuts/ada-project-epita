@@ -4,18 +4,18 @@ package body Renderer is
 
 	-- sample a sprite
 	-- X and Y belongs to [0; 1] interval
-	-- Img must be a valid access
+	-- Source must be a valid access
 	function Sample_Sprite(
-		Img : in Sprite_Access;
+		Source : in Sprite_Access;
 		X : in Float;
 		Y : in Float
 	) return UInt8
 	is
-		Px : Natural := Natural(X * Float(SPRITE_SIZE));
-		Py : Natural := Natural(Y * Float(SPRITE_SIZE));
+		Px : Natural := Natural(Float'Floor(X * Float(SPRITE_SIZE)));
+		Py : Natural := Natural(Float'Floor(Y * Float(SPRITE_SIZE)));
 		I : Natural := Py * SPRITE_SIZE + Px;
 	begin
-		return UInt8(Img(unsigned(I)));
+		return UInt8(Source(unsigned(I)));
 	end Sample_Sprite;
 
 	procedure Load_Sprite(
@@ -32,12 +32,6 @@ package body Renderer is
 
 		 	X := Float(Px) / Float(Size);
 		 	Y := Float(Py) / Float(Size);
-
-			pragma Loop_Invariant (
-				I >= 0 and then I < Size * Size and then
-				Px >= 0 and then Px < Size and then
-				X >= 0.0 and then X <= 1.0 and then
-				Y >= 0.0 and then Y <= 1.0);
 
 			Indices(I) := Sample_Sprite(Source, X, Y);
 		 end loop;
@@ -56,17 +50,16 @@ package body Renderer is
 		Load_Sprite(SPRITE_PLAYER'Access, PLAYER_Indices, PLAYER_SPRITE_SIZE);
 	end Initialize;
 
-	procedure Clear is
-	begin
-		-- FIXME: choose background color
-		Fill(HAL.Bitmap.Black);
-	end Clear;
-
 	procedure Fill(color : in Bitmap_Color) is
 	begin
 		Display.Hidden_Buffer(1).Set_Source(color);
 		Display.Hidden_Buffer(1).Fill;
 	end Fill;
+
+	procedure Clear is
+	begin
+		Fill(HAL.Bitmap.Black);
+	end Clear;
 
 	procedure DrawEnemy(id : in CellId) is
 		X : Integer;
@@ -98,10 +91,6 @@ package body Renderer is
 			Height      => ENEMY_Buffer.Height,
 			Synchronous => True
 		);
-
-		-- TODO: to replace with bitmap drawing
-		-- Display.Hidden_Buffer(1).Set_Source(HAL.Bitmap.Red);
-		-- Display.Hidden_Buffer(1).Fill_Circle((X, Y), SPRITE_SIZE);
 	end DrawEnemy;
 
 	procedure DrawPlayer(X, Y : in RangedPos) is
@@ -156,7 +145,6 @@ package body Renderer is
 	procedure Flip is
 	begin
 		Display.Update_Layers;
-		-- Display.Update_Layer (1, Copy_Back => True);
 	end Flip;
 
 end Renderer;
