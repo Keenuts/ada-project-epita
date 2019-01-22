@@ -3,7 +3,7 @@ generic
 	type Game is access T;
 
 package Input is
-	type Event is (RIGHT_TOUCH, LEFT_TOUCH, MIDDLE_TOUCH);
+	type Event is (RIGHT_TOUCH, LEFT_TOUCH, MIDDLE_TOUCH, BUTTON);
 	type Callback_Access is not null access procedure (Handle : in out Game;
 							   Weight : in Natural);
 	procedure RegisterEvent(e : Event; callback : Callback_Access; Handle : Game);

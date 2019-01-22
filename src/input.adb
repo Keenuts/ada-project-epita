@@ -19,9 +19,12 @@ package body Input is
 	procedure Poll is
 		State : TP_State := Touch_Panel.Get_All_Touch_Points;
 	begin
+		if User_Button.Has_Been_Pressed then
+			FireEvent(BUTTON, 0);
+		end if;
+
 		for E of State loop
-			FireEvent(GetStateFromPosition(E.X, E.Y),
-				  E.Weight);
+			FireEvent(GetStateFromPosition(E.X, E.Y), E.Weight);
 		end loop;
 	end Poll;
 
