@@ -49,7 +49,6 @@ with Vec2; use Vec2;
 with Renderer; use Renderer;
 with Input;
 with Timer;
-with Entity; use Entity;
 with Game; use Game;
 with Collision; use Collision;
 
@@ -62,46 +61,18 @@ is
 
 	procedure RightTouch(game : in out GameAccess; Weight : in Natural) is
 	begin
-		if game.player.X < Renderer.RangedPos'Last then
-			game.player.X := game.player.X + 1;
-		end if;
+		game.PlayerMoveRight;
 	end;
 
 	procedure LeftTouch(game : in out GameAccess; Weight : in Natural) is
 	begin
-		if game.player.X > Renderer.RangedPos'First then
-			game.player.X := game.player.X - 1;
-		end if;
+		game.PlayerMoveLeft;
 	end;
 
 	procedure MiddleTouch(game : in out GameAccess; Weight : in Natural) is
 	begin
-		-- particle fire rate is limited
-		if game.lastParticleSpawn + PARTICLE_FIRE_DELAY > clock then
-			return;
-		end if;
-
-		for P of game.particles loop
-			if not P.Alive then
-				P := (True, game.player.X, game.player.Y);
-				game.lastParticleSpawn := clock;
-
-				-- muzzle-flash effect
-				Renderer.Fill(HAL.Bitmap.White);
-				Renderer.Flip;
-				exit;
-			end if;
-		end loop;
+		game.FireParticle;
 	end;
-
-	function min(A, B: Natural) return Natural is
-	begin
-		if A < B then
-			return A;
-		else
-			return B;
-		end if;
-	end min;
 
 begin
 	Renderer.Initialize;
@@ -117,11 +88,11 @@ begin
 	Timer_GameAccess.RegisterInterval(Seconds(1), UpdateEnemies'Access, game);
 	Timer_GameAccess.RegisterInterval(Milliseconds(50), UpdateParticles'Access, game);
 
-	loop
+	while not game.GameEnded loop
 		Input_GameAccess.Poll;
 		Timer_GameAccess.Poll;
 
-		CollideParticles(game);
+		CollideObjects(game);
 		game.DrawFrame;
 	end loop;
 exception
@@ -131,6 +102,15 @@ exception
 			Left : Natural := 1;
 			Right : Natural := 1;
 			Y : Natural := 0;
+
+			function min(A, B: Natural) return Natural is
+			begin
+				if A < B then
+					return A;
+				else
+					return B;
+				end if;
+			end min;
 		begin
 			while Right < Msg'Length loop
 				Right := min(Left + 30, Msg'Last);

@@ -17,7 +17,7 @@ package Game is
 		lastParticleSpawn : Time;
 
 		player : Entity.Player;
-		score : Natural;
+		score : Natural := 0;
 	end record;
 	type GameAccess is access GameContext;
 
@@ -25,6 +25,19 @@ package Game is
 	procedure UpdateEnemies(Self : in out GameAccess);
 	procedure UpdateParticles(Self : in out GameAccess);
 	procedure DrawFrame(Self : in out GameContext);
+	function GameEnded(Self : in out GameContext) return Boolean;
+	procedure HandleCollision(Self : in out GameContext;
+				  A : in out Particle;
+				  B : in Enemy);
+	procedure CollisionCallback(Self : in out GameContext;
+				    A : in out Entity.Entity'Class;
+				    B : in out Entity.Entity'Class);
+
+	-- Those are the three possible moves of the game
+	-- They might be plugged with whatever user input desired
+	procedure FireParticle(Self : in out GameContext);
+	procedure PlayerMoveLeft(Self : in out GameContext);
+	procedure PlayerMoveRight(Self : in out GameContext);
 
 private
 

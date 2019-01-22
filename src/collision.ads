@@ -4,7 +4,7 @@ with Game; use Game;
 
 package Collision is
 	function CollideAABB(A, B : in Rect) return Boolean;
-	function CollideParticle(ctx : in out GameAccess;
-				 P : in RangedEntity'Class) return Boolean;
+	procedure CollideParticle(ctx : in out GameAccess; P : in out Particle);
 	procedure CollideParticles(ctx : in out GameAccess);
+	procedure CollideObjects(ctx : in out GameAccess);
 end Collision;

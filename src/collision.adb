@@ -21,31 +21,32 @@ package body Collision is
 		return True;
 	end CollideAABB;
 
-	function CollideParticle(ctx : in out GameAccess; P : in RangedEntity'Class) return Boolean is
+	procedure CollideParticle(ctx : in out GameAccess; P : in out Particle) is
 		A, B : Rect;
 	begin
 		for E of ctx.enemies loop
-			if E.Alive then
+			if E.IsAlive then
 				A := E.getAABB;
 				B := P.getAABB;
 				if CollideAABB(A, B) then
-					E.Alive := False;
-					return True;
+					ctx.CollisionCallback(P, E);
 				end if;
 			end if;
 		end loop;
-		return False;
 	end CollideParticle;
 
 	procedure CollideParticles(ctx : in out GameAccess) is
 	begin
 		for P of ctx.particles loop
-			if P.Alive then
-				if CollideParticle(ctx, P) then
-					P.Alive := False;
-				end if;
+			if P.IsAlive then
+				CollideParticle(ctx, P);
 			end if;
 		end loop;
 	end CollideParticles;
+
+	procedure CollideObjects(ctx : in out GameAccess) is
+	begin
+		CollideParticles(ctx);
+	end CollideObjects;
 
 end Collision;
