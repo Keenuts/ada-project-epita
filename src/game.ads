@@ -13,10 +13,10 @@ package Game is
 
 	type EnemiesArray is array(Natural range 1 .. MAX_ENEMY_COUNT) of Entity.Enemy;
 
-	MAX_PARTICLE_COUNT : constant Natural := 100;
+	MAX_PARTICLE_COUNT : constant Natural := 10;
 	type ParticleArray is array(Natural range 1 .. MAX_PARTICLE_COUNT) of Entity.Particle;
 	
-	PARTICLE_FIRE_DELAY : constant Time_Span := Milliseconds(100);
+	PARTICLE_FIRE_DELAY : constant Time_Span := Milliseconds(200);
 	type GameContext is tagged record
 		enemies : EnemiesArray;
 
