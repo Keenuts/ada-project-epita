@@ -98,6 +98,24 @@ package body Game is
 		Renderer.Flip;
 	end DrawFrame;
 
+	function Transform_RangedPos(
+		P : in RangedPos;
+		SizeA, SizeB : in Positive
+	) return RangedPos
+	is
+		PX : Float;
+	begin
+		-- project to frustrum-space coordinates
+		PX := Float(P) / Float(RANGED_POS_LEN);
+		-- convert to screen-space coordinated
+		PX := PX * Float(SCREEN_WIDTH - SizeA);
+		PX := PX + Float(SizeA) * 0.5;
+		PX := PX / Float(SCREEN_WIDTH - SizeB);
+		PX := PX * Float(RANGED_POS_LEN);
+
+		return RangedPos(PX);
+	end Transform_RangedPos;
+
 	procedure FireParticle(Self : in out GameContext) is
 	begin
 		-- particle fire rate is limited
@@ -107,7 +125,11 @@ package body Game is
 
 		for P of Self.particles loop
 			if not P.IsAlive then
-				P.Init(Self.player.GetX, Self.player.GetY);
+				P.Init(
+					Transform_RangedPos(Self.player.GetX, PLAYER_SPRITE_SIZE, PARTICLE_SIZE),
+					Transform_RangedPos(Self.player.GetY, PLAYER_SPRITE_SIZE, PARTICLE_SIZE),
+					PARTICLE_SIZE
+				);
 				Self.lastParticleSpawn := clock;
 
 				-- muzzle-flash effect
