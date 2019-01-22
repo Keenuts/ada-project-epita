@@ -8,10 +8,10 @@ resources:
 ${PROJECT}: resources
 	gprbuild -XADL_BUILD=Debug -XADL_BUILD_CHECKS=Enabled -P ${PROJECT}.gpr
 
-prove:
+prove: ${PROJECT}
 	gnatprove -P ${PROJECT}.gpr
 
-flash:
+flash:  ${PROJECT}
 	arm-eabi-objcopy -O binary obj/main image.bin
 	st-flash --reset write image.bin 0x8000000
 
