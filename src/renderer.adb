@@ -61,7 +61,7 @@ package body Renderer is
 		Fill(HAL.Bitmap.Black);
 	end Clear;
 
-	procedure DrawEnemy(X, Y : in RangedPos) is
+	procedure Draw_Enemy(X, Y : in RangedPos) is
 		PY, PX : Float;
 		framebuffer : DMA2D_Buffer := To_DMA2D_Buffer(Display.Hidden_Buffer(1).all);
 	begin
@@ -87,9 +87,9 @@ package body Renderer is
 			Height      => ENEMY_Buffer.Height,
 			Synchronous => False
 		);
-	end DrawEnemy;
+	end Draw_Enemy;
 
-	procedure DrawPlayer(X, Y : in RangedPos) is
+	procedure Draw_Player(X, Y : in RangedPos) is
 		PY, PX : Float;
 		framebuffer : DMA2D_Buffer := To_DMA2D_Buffer(Display.Hidden_Buffer(1).all);
 	begin
@@ -115,10 +115,10 @@ package body Renderer is
 			Height      => PLAYER_Buffer.Height,
 			Synchronous => False
 		);
-	end DrawPlayer;
+	end Draw_Player;
 
 	-- Draw a particle at the given position
-	procedure DrawParticle(X, Y : in RangedPos) is
+	procedure Draw_Particle(X, Y : in RangedPos) is
 		PY, PX : Float;
 	begin
 		-- project to frustrum-space coordinates
@@ -136,7 +136,7 @@ package body Renderer is
 			PARTICLE_SIZE
 		));
 		null;
-	end DrawParticle;
+	end Draw_Particle;
 
 	procedure Flip is
 	begin

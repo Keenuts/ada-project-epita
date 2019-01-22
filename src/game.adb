@@ -83,17 +83,17 @@ package body Game is
 
 		for E of Self.enemies loop
 			if E.IsAlive then
-				Renderer.DrawEnemy(E.GetX, E.GetY);
+				Renderer.Draw_Enemy(E.GetX, E.GetY);
 			end if;
 		end loop;
 
 		for P of Self.particles loop
 			if P.IsAlive then
-				Renderer.DrawParticle(P.GetX, P.GetY);
+				Renderer.Draw_Particle(P.GetX, P.GetY);
 			end if;
 		end loop;
 
-		Renderer.DrawPlayer(Self.player.GetX, Self.player.GetY);
+		Renderer.Draw_Player(Self.player.GetX, Self.player.GetY);
 
 		Renderer.Flip;
 	end DrawFrame;

@@ -78,13 +78,13 @@ package Renderer is
 	procedure Clear;
 
 	-- Draw an enemy at the given position
-	procedure DrawEnemy(X, Y : in RangedPos);
+	procedure Draw_Enemy(X, Y : in RangedPos);
 
 	-- Draw an player at the given position
-	procedure DrawPlayer(X, Y : in RangedPos);
+	procedure Draw_Player(X, Y : in RangedPos);
 
 	-- Draw a particle at the given position
-	procedure DrawParticle(X, Y : in RangedPos);
+	procedure Draw_Particle(X, Y : in RangedPos);
 
 	-- Flips back and front buffers. (~ CommitChangedToDisplay)
 	procedure Flip;
