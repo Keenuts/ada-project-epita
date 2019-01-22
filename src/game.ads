@@ -28,7 +28,7 @@ package Game is
 	function GameEnded(Self : in out GameContext) return Boolean;
 	procedure HandleCollision(Self : in out GameContext;
 				  A : in out Particle;
-				  B : in Enemy);
+				  B : in out Enemy);
 	procedure CollisionCallback(Self : in out GameContext;
 				    A : in out Entity.Entity'Class;
 				    B : in out Entity.Entity'Class);

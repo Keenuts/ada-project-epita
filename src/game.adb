@@ -118,16 +118,11 @@ package body Game is
 
 	procedure HandleCollision(Self : in out GameContext;
 				  A : in out Particle;
-				  B : in Enemy) is
+				  B : in out Enemy) is
 	begin
-		for E of Self.enemies loop
-			if E = B then
-				Self.score := Self.score + 1;
-				E.Dead;
-				exit;
-			end if;
-		end loop;
+		B.Dead;
 		A.Dead;
+		Self.score := Self.score + 1;
 	end HandleCollision;
 
 	procedure CollisionCallback(Self: in out GameContext;
