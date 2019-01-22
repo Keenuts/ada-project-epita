@@ -62,6 +62,14 @@ package body Renderer is
 			PLAYER_SPRITE_SIZE,
 			PLAYER_SPRITE_SIZE
 		);
+		Load_Sprite(
+			SPLASH_SPRITE'Access,
+			SPLASH_SPRITE_WIDTH,
+			SPLASH_SPRITE_HEIGHT,
+			SPLASH_Indices,
+			SPLASH_WIDTH,
+			SPLASH_HEIGHT
+		);
 	end Initialize;
 
 	procedure Fill(color : in Bitmap_Color) is
@@ -130,6 +138,25 @@ package body Renderer is
 			Synchronous => False
 		);
 	end Draw_Player;
+
+	procedure Draw_Splash is
+		framebuffer : DMA2D_Buffer := To_DMA2D_Buffer(Display.Hidden_Buffer(1).all);
+	begin
+		STM32.DMA2D.DMA2D_Copy_Rect(
+			Src_Buffer  => SPLASH_Buffer,
+			X_Src       => 0,
+			Y_Src       => 0,
+			Dst_Buffer  => framebuffer,
+			X_Dst       => 0,
+			Y_Dst       => 20,
+			Bg_Buffer   => framebuffer,
+			X_Bg        => 0,
+			Y_Bg        => 20,
+			Width       => SPLASH_Buffer.Width,
+			Height      => SPLASH_Buffer.Height,
+			Synchronous => False
+		);
+	end Draw_Splash;
 
 	-- Draw a particle at the given position
 	procedure Draw_Particle(X, Y : in RangedPos) is

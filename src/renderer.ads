@@ -24,6 +24,11 @@ package Renderer is
 	PLAYER_SPRITE : aliased SPRITE;
 	pragma Import (C, PLAYER_SPRITE, "sprite_player");
 
+	SPLASH_SPRITE_WIDTH  : constant Positive := 54;
+	SPLASH_SPRITE_HEIGHT : constant Positive := 5;
+	SPLASH_SPRITE : aliased SPRITE;
+	pragma Import (C, SPLASH_SPRITE, "splash");
+
 	-- ==================
 	-- DMA sprite storage
 	-- ==================
@@ -32,7 +37,7 @@ package Renderer is
 		(  0,   0,   0,   0),
 		(255, 255,   0,   0),
 		(255,   0, 255,   0),
-		(255,   0,   0, 255),
+		(255, 255, 255, 255),
 		others => (0, 0, 0, 0)
 	);
 
@@ -65,6 +70,19 @@ package Renderer is
 		CLUT_Addr       => COLOR_PALETTE(0)'Address
 	);
 
+	-- The size of the displayed menu spash sprite
+	SPLASH_WIDTH  : constant Positive := SCREEN_WIDTH;
+	SPLASH_HEIGHT : constant Positive := 50;
+	SPLASH_Indices 	  : Indexed_Bitmap(0 .. SPLASH_WIDTH * SPLASH_HEIGHT - 1);
+	SPLASH_Buffer  	  : constant DMA2D_Buffer := (
+		Color_Mode      => L8,
+		Addr            => SPLASH_Indices(0)'Address,
+		Width           => SPLASH_WIDTH,
+		Height          => SPLASH_HEIGHT,
+		CLUT_Color_Mode => ARGB8888,
+		CLUT_Addr       => COLOR_PALETTE(0)'Address
+	);
+
 	-- Type Definition
 	type RangedPos is range 1 .. 100 with Default_Value => 1;
 	RANGED_POS_LEN : constant Positive := Positive(RangedPos'Last - RangedPos'First);
@@ -85,6 +103,9 @@ package Renderer is
 
 	-- Draw a particle at the given position
 	procedure Draw_Particle(X, Y : in RangedPos);
+
+	-- Draw the splash screen
+	procedure Draw_Splash;
 
 	-- Flips back and front buffers. (~ CommitChangedToDisplay)
 	procedure Flip;
