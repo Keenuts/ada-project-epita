@@ -66,11 +66,11 @@ package body Renderer is
 		framebuffer : DMA2D_Buffer := To_DMA2D_Buffer(Display.Hidden_Buffer(1).all);
 	begin
 		-- project to frustrum-space coordinates
-		PX := Float(X) / Float(RangedPos'Last);
-		PY := Float(Y) / Float(RangedPos'Last);
+		PX := Float(X) / Float(RANGED_POS_LEN);
+		PY := Float(Y) / Float(RANGED_POS_LEN);
 
 		-- transform to screen-space coordinates
-		PX := PX * Float(SCREEN_WIDTH -  ENEMY_SPRITE_SIZE);
+		PX := PX * Float(SCREEN_WIDTH - ENEMY_SPRITE_SIZE);
 		PY := PY * Float(SCREEN_HEIGHT - ENEMY_SPRITE_SIZE);
 
 		STM32.DMA2D.DMA2D_Copy_Rect(
@@ -94,8 +94,8 @@ package body Renderer is
 		framebuffer : DMA2D_Buffer := To_DMA2D_Buffer(Display.Hidden_Buffer(1).all);
 	begin
 		-- project to frustrum-space coordinates
-		PX := Float(X) / Float(RangedPos'Last);
-		PY := Float(Y) / Float(RangedPos'Last);
+		PX := Float(X) / Float(RANGED_POS_LEN);
+		PY := Float(Y) / Float(RANGED_POS_LEN);
 
 		-- transform to screen-space coordinates
 		PX := PX * Float(SCREEN_WIDTH - PLAYER_SPRITE_SIZE);

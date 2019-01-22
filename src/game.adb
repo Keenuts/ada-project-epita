@@ -7,7 +7,7 @@ package body Game is
 		Y : RangedPos := RangedPos'First;
 	begin
 		for I in Self.enemies'Range loop
-			Self.enemies(I).Init(X, Y);
+			Self.enemies(I).Init(X, Y, ENEMY_SPRITE_SIZE);
 
 			if X >= RangedPos'Last - ENEMY_STEP_W then
 				X := RangedPos'First;
@@ -20,8 +20,11 @@ package body Game is
 
 	procedure InitializePlayer(Self: in out GameContext) is
 	begin
-		Self.player.Init((Renderer.RangedPos'Last + Renderer.RangedPos'First) / 2,
-				 Renderer.RangedPos'Last);
+		Self.player.Init(
+			(Renderer.RangedPos'Last + Renderer.RangedPos'First) / 2,
+			Renderer.RangedPos'Last,
+			PLAYER_SPRITE_SIZE
+		);
 	end InitializePlayer;
 
 	procedure InitializeParticles(Self: in out GameContext) is
@@ -152,5 +155,4 @@ package body Game is
 			Self.HandleCollision(Particle(A), Enemy(B));
 		end if;
 	end CollisionCallback;
-
 end Game;

@@ -8,9 +8,7 @@ package Entity is
 	type Player   is new Entity with private;
 	type Particle is new Entity with private;
 
-	function getAABB(Self: in Particle'Class) return Rect;
-	function getAABB(Self: in Enemy'Class) return Rect;
-	function getAABB(Self: in Player'Class) return Rect;
+	function getAABB(Self: in Entity'Class) return Rect;
 
 	procedure InitializeEntity(Self: in out Entity'Class);
 	function IsAlive(Self: in Entity'Class) return Boolean;
@@ -19,7 +17,8 @@ package Entity is
 	-- Initialization functions
 	procedure Init(Self : in out Entity'Class;
 		       X : Renderer.RangedPos;
-		       Y : Renderer.RangedPos);
+		       Y : Renderer.RangedPos;
+		       Size : Positive);
 
 	-- Setters
 	procedure SetPosition(Self : in out Entity'Class;
@@ -38,6 +37,7 @@ private
 		Alive : Boolean;
 		X : Renderer.RangedPos;
 		Y : Renderer.RangedPos;
+		Size : Positive;
 	end record;
 
 	type Player   is new Entity with null record;

@@ -1,35 +1,16 @@
 package body Entity is
-	function getAABB(Self: in Particle'Class) return Rect is
+	function getAABB(Self: in Entity'Class) return Rect is
 		PX, PY : Float;
 	begin
-		PX := FLoat(Self.X) / Float(Renderer.RangedPos'Last);
-		PY := FLoat(Self.Y) / Float(Renderer.RangedPos'Last);
-		PX := PX * Float(SCREEN_WIDTH);
-		PY := PY * Float(SCREEN_HEIGHT);
+		-- project to frustrum-space coordinates
+		PX := Float(Self.X) / Float(RANGED_POS_LEN);
+		PY := Float(Self.Y) / Float(RANGED_POS_LEN);
 
-		return ((Natural(PX), Natural(PY)), PARTICLE_SIZE, PARTICLE_SIZE);
-	end getAABB;
+		-- convert to screen-space coordinated
+		PX := PX * Float(SCREEN_WIDTH - Self.Size);
+		PY := PY * Float(SCREEN_HEIGHT - Self.Size);
 
-	function getAABB(Self: in Enemy'Class) return Rect is
-		PX, PY : Float;
-	begin
-		PX := FLoat(Self.X) / Float(Renderer.RangedPos'Last);
-		PY := FLoat(Self.Y) / Float(Renderer.RangedPos'Last);
-		PX := PX * Float(SCREEN_WIDTH);
-		PY := PY * Float(SCREEN_HEIGHT);
-
-		return ((Natural(PX), Natural(PY)), ENEMY_SPRITE_SIZE, ENEMY_SPRITE_SIZE);
-	end getAABB;
-
-	function getAABB(Self: in Player'Class) return Rect is
-		PX, PY : Float;
-	begin
-		PX := FLoat(Self.X) / Float(Renderer.RangedPos'Last);
-		PY := FLoat(Self.Y) / Float(Renderer.RangedPos'Last);
-		PX := PX * Float(SCREEN_WIDTH);
-		PY := PY * Float(SCREEN_HEIGHT);
-
-		return ((Natural(PX), Natural(PY)), PLAYER_SPRITE_SIZE, PLAYER_SPRITE_SIZE);
+		return ((Natural(PX), Natural(PY)), Self.Size, Self.Size);
 	end getAABB;
 
 	procedure InitializeEntity(Self: in out Entity'Class) is
@@ -50,13 +31,15 @@ package body Entity is
 
 	procedure Init(Self : in out Entity'Class;
 		       X : Renderer.RangedPos;
-		       Y : Renderer.RangedPos) is
+		       Y : Renderer.RangedPos;
+		       Size : Positive) is
 	begin
 		Self.Alive := True;
 		Self.Id := InternalId;
 		InternalId := InternalId + 1;
 		Self.X := X;
 		Self.Y := Y;
+		Self.Size := Size;
 	end Init;
 
 	procedure SetPosition(Self : in out Entity'Class;
