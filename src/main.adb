@@ -42,7 +42,6 @@ is
 	begin
 		game.FireParticle;
 	end;
-
 begin
 	Renderer.Initialize;
 	Input_GameAccess.Initialize;
