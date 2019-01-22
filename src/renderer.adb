@@ -6,34 +6,35 @@ package body Renderer is
 	-- X and Y belongs to [0; 1] interval
 	-- Source must be a valid access
 	function Sample_Sprite(
-		Source : in Sprite_Access;
-		X : in Float;
-		Y : in Float
+		Source		: in Sprite_Access;
+		Width, Height	: in Positive;
+		X, Y		: in Float
 	) return UInt8
 	is
-		Px : Natural := Natural(Float'Floor(X * Float(SPRITE_SIZE)));
-		Py : Natural := Natural(Float'Floor(Y * Float(SPRITE_SIZE)));
-		I : Natural := Py * SPRITE_SIZE + Px;
+		Px : Natural := Natural(Float'Floor(X * Float(Width)));
+		Py : Natural := Natural(Float'Floor(Y * Float(Height)));
+		I : Natural := Py * Width + Px;
 	begin
 		return UInt8(Source(unsigned(I)));
 	end Sample_Sprite;
 
 	procedure Load_Sprite(
-		Source     : in Sprite_Access;
-		Indices    : in out Indexed_Bitmap;
-		Size 	   : in Positive)
+		Src		: in Sprite_Access;
+		Src_W, Src_H	: in Positive;
+		Dst    		: in out Indexed_Bitmap;
+		Dst_W, Dst_H	: in Positive)
 	is
 		Px, Py : Natural;
 		X, Y : Float;
 	begin
-		for I in Indices'Range loop
-			Px := I mod Size;
-			Py := I / Size;
+		for I in Dst'Range loop
+			Px := I mod Dst_W;
+			Py := I /   Dst_W;
 
-		 	X := Float(Px) / Float(Size);
-		 	Y := Float(Py) / Float(Size);
+			X := Float(Px) / Float(Dst_W);
+			Y := Float(Py) / Float(Dst_H);
 
-			Indices(I) := Sample_Sprite(Source, X, Y);
+			Dst(I) := Sample_Sprite(Src, Src_W, Src_H, X, Y);
 		 end loop;
 	end Load_Sprite;
 
@@ -46,8 +47,21 @@ package body Renderer is
 		LCD_Std_Out.Current_Background_Color := BACKGROUND_COLOR;
 
 		-- Initialize sprites DMA-BUFs
-		Load_Sprite(SPRITE_ENEMY'Access,  ENEMY_Indices,  ENEMY_SPRITE_SIZE);
-		Load_Sprite(SPRITE_PLAYER'Access, PLAYER_Indices, PLAYER_SPRITE_SIZE);
+		Load_Sprite(
+			ENEMY_SPRITE'Access,
+			SPRITE_SIZE,
+			SPRITE_SIZE,
+			ENEMY_Indices,
+			ENEMY_SPRITE_SIZE, ENEMY_SPRITE_SIZE
+		);
+		Load_Sprite(
+			PLAYER_SPRITE'Access,
+			SPRITE_SIZE,
+			SPRITE_SIZE,
+			PLAYER_Indices,
+			PLAYER_SPRITE_SIZE,
+			PLAYER_SPRITE_SIZE
+		);
 	end Initialize;
 
 	procedure Fill(color : in Bitmap_Color) is

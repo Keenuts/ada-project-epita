@@ -19,10 +19,10 @@ package Renderer is
 	type Sprite is array(unsigned) of aliased Interfaces.Unsigned_8;
 	type Sprite_Access is not null access constant Sprite;
 
-	SPRITE_ENEMY : aliased SPRITE;
-	pragma Import (C, SPRITE_ENEMY, "sprite_enemy");
-	SPRITE_PLAYER : aliased SPRITE;
-	pragma Import (C, SPRITE_PLAYER, "sprite_player");
+	ENEMY_SPRITE : aliased SPRITE;
+	pragma Import (C, ENEMY_SPRITE, "sprite_enemy");
+	PLAYER_SPRITE : aliased SPRITE;
+	pragma Import (C, PLAYER_SPRITE, "sprite_player");
 
 	-- ==================
 	-- DMA sprite storage
@@ -94,15 +94,16 @@ private
 	BACKGROUND_COLOR : constant Bitmap_Color := (Alpha => 255, others => 0);
 
 	function Sample_Sprite(
-		Source : in Sprite_Access;
-		X : in Float;
-		Y : in Float
+		Source		: in Sprite_Access;
+		Width, Height	: in Positive;
+		X, Y		: in Float
 	) return UInt8;
 
 	procedure Load_Sprite(
-		Source     : in Sprite_Access;
-		Indices    : in out Indexed_Bitmap;
-		Size 	   : in Positive);
+		Src		: in Sprite_Access;
+		Src_W, Src_H	: in Positive;
+		Dst    		: in out Indexed_Bitmap;
+		Dst_W, Dst_H	: in Positive);
 
 
 end Renderer;
