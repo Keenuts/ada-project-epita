@@ -3,11 +3,18 @@ with Renderer; use Renderer;
 with Ada.Real_Time; use Ada.Real_Time; -- for seconds
 
 package Game is
-	MAX_ENEMY_COUNT : constant CellId := 7;
-	type EnemiesArray is array(CellId range 1 .. MAX_ENEMY_COUNT) of Enemy;
+	MAX_ENEMY_COUNT : constant Natural := 7;
+
+	ENEMY_SLOTS : constant RangedPos := RangedPos((SCREEN_WIDTH) / (ENEMY_SPRITE_SIZE + 5));
+	ENEMY_STEP_W : constant RangedPos := RangedPos(RANGED_POS_LEN / Positive(ENEMY_SLOTS - 3));
+	ENEMY_STEP_H : constant RangedPos := RangedPos(RANGED_POS_LEN / Positive(ENEMY_SLOTS));
+
+	ENEMY_SPEED : constant RangedPos := 1;
+
+	type EnemiesArray is array(Natural range 1 .. MAX_ENEMY_COUNT) of Entity.Enemy;
 
 	MAX_PARTICLE_COUNT : constant Natural := 10;
-	type ParticleArray is array(Natural range 1 .. MAX_PARTICLE_COUNT) of Particle;
+	type ParticleArray is array(Natural range 1 .. MAX_PARTICLE_COUNT) of Entity.Particle;
 	
 	PARTICLE_FIRE_DELAY : constant Time_Span := Seconds(1);
 	type GameContext is tagged record

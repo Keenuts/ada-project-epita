@@ -10,14 +10,10 @@ with STM32.DMA2D_Bitmap;    use STM32.DMA2D_Bitmap;
 -- with STM32.SDRAM;           use STM32.SDRAM;
 -- with System;
 
-package Renderer
-	with SPARK_Mode
-is
-	-- pragma SPARK_Mode (On);
-	-- External resources
-		-- BMP header: 18 bytes
-		-- img size: 8X8
-		-- img depth: 4 bytes / BGRA
+package Renderer is
+	-- Display constants for STM32f4-discovery
+	SCREEN_WIDTH  : constant Integer := 238;
+	SCREEN_HEIGHT : constant Integer := 320;
 
 	SPRITE_SIZE : constant Positive := 8;
 	type Sprite is array(unsigned) of aliased Interfaces.Unsigned_8;
@@ -27,15 +23,6 @@ is
 	pragma Import (C, SPRITE_ENEMY, "sprite_enemy");
 	SPRITE_PLAYER : aliased SPRITE;
 	pragma Import (C, SPRITE_PLAYER, "sprite_player");
-
-	-- GRID SIZE: number of cells to divide the screen in.
-	GRID_HEIGHT : constant Integer := 8;
-	GRID_WIDTH  : constant Integer := 7;
-	CELL_COUNT  : constant Integer := GRID_WIDTH * GRID_HEIGHT;
-
-	-- Display constants
-	SCREEN_WIDTH  : constant Integer := 238;
-	SCREEN_HEIGHT : constant Integer := 320;
 
 	-- ==================
 	-- DMA sprite storage
@@ -79,8 +66,8 @@ is
 	);
 
 	-- Type Definition
-	type CellId is range 1 .. CELL_COUNT with Default_Value => 1;
 	type RangedPos is range 1 .. 100 with Default_Value => 1;
+	RANGED_POS_LEN : constant Positive := Positive(RangedPos'Last - RangedPos'First);
 
 	-- Initialize thr STM32 and loads sprites
 	procedure Initialize;
@@ -91,7 +78,7 @@ is
 	procedure Clear;
 
 	-- Draw an enemy at the given position
-	procedure DrawEnemy(id : in CellId);
+	procedure DrawEnemy(X, Y : in RangedPos);
 
 	-- Draw an player at the given position
 	procedure DrawPlayer(X, Y : in RangedPos);
@@ -102,11 +89,7 @@ is
 	-- Flips back and front buffers. (~ CommitChangedToDisplay)
 	procedure Flip;
 
-
-	-- size of 1 cell in pixels
-	CELL_SIZE : constant Integer := SCREEN_WIDTH / GRID_WIDTH;
-	-- particle sprite size in pixels
-	PARTICLE_SIZE : constant Integer := 5;
+	PARTICLE_SIZE : constant Positive := 5;
 private
 	BACKGROUND_COLOR : constant Bitmap_Color := (Alpha => 255, others => 0);
 

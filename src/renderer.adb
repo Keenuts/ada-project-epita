@@ -61,29 +61,25 @@ package body Renderer is
 		Fill(HAL.Bitmap.Black);
 	end Clear;
 
-	procedure DrawEnemy(id : in CellId) is
-		X : Integer;
-		Y : Integer;
+	procedure DrawEnemy(X, Y : in RangedPos) is
+		PY, PX : Float;
 		framebuffer : DMA2D_Buffer := To_DMA2D_Buffer(Display.Hidden_Buffer(1).all);
 	begin
-		Y := (Integer(id) - 1) / GRID_WIDTH;
+		-- project to frustrum-space coordinates
+		PX := Float(X) / Float(RangedPos'Last);
+		PY := Float(Y) / Float(RangedPos'Last);
 
-		if Y mod 2 = 0 then
-			X := GRID_WIDTH - ((Integer(id) - 1) mod GRID_WIDTH) - 1;
-		else
-			X := (Integer(id) - 1) mod GRID_WIDTH;
-		end if;
-
-		Y := Y * CELL_SIZE;
-		X := X * CELL_SIZE;
+		-- transform to screen-space coordinates
+		PX := PX * Float(SCREEN_WIDTH -  ENEMY_SPRITE_SIZE);
+		PY := PY * Float(SCREEN_HEIGHT - ENEMY_SPRITE_SIZE);
 
 		STM32.DMA2D.DMA2D_Copy_Rect(
 			Src_Buffer  => ENEMY_Buffer,
 			X_Src       => 0,
 			Y_Src       => 0,
 			Dst_Buffer  => framebuffer,
-			X_Dst       => X,
-			Y_Dst       => Y,
+			X_Dst       => Natural(PX),
+			Y_Dst       => Natural(PY),
 			Bg_Buffer   => STM32.DMA2D.Null_Buffer,
 			X_Bg        => 0,
 			Y_Bg        => 0,

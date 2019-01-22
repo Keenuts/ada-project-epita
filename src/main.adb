@@ -53,8 +53,8 @@ begin
 	Input_GameAccess.RegisterEvent(LEFT_TOUCH, LeftTouch'Access, game);
 	Input_GameAccess.RegisterEvent(MIDDLE_TOUCH, MiddleTouch'Access, game);
 
-	Timer_GameAccess.RegisterInterval(Seconds(1), UpdateEnemies'Access, game);
-	Timer_GameAccess.RegisterInterval(Milliseconds(50), UpdateParticles'Access, game);
+	Timer_GameAccess.RegisterInterval(Milliseconds(250), UpdateEnemies'Access, game);
+	Timer_GameAccess.RegisterInterval(Milliseconds(10), UpdateParticles'Access, game);
 
 	while not game.GameEnded loop
 		Input_GameAccess.Poll;

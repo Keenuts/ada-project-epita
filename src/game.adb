@@ -3,9 +3,18 @@ with HAL.Bitmap; use HAL.Bitmap;
 package body Game is
 
 	procedure InitializeEnemies(Self : in out GameContext) is
+		X : RangedPos := RangedPos'First;
+		Y : RangedPos := RangedPos'First;
 	begin
 		for I in Self.enemies'Range loop
-			Self.enemies(I).Init(I * 2);
+			Self.enemies(I).Init(X, Y);
+
+			if X >= RangedPos'Last - ENEMY_STEP_W then
+				X := RangedPos'First;
+				Y := Y + ENEMY_STEP_H;
+			else
+				X := X + ENEMY_STEP_W;
+			end if;
 	 	end loop;
 	end InitializeEnemies;
 
@@ -31,12 +40,22 @@ package body Game is
 	end;
 
 	procedure UpdateEnemies(Self : in out GameAccess) is
+		X, Y : RangedPos;
 	begin
 		for E of Self.enemies loop
 			if E.IsAlive then
-				E.SetPosition(
-					(E.GetPosition mod Renderer.CellId'Last) + 1
-				);
+				X := E.GetX;
+				Y := E.GetY;
+
+				if X >= RangedPos'Last - ENEMY_SPEED then
+					X := RangedPos'First;
+					Y := Y + ENEMY_STEP_H;
+				else
+					X := X + ENEMY_SPEED;
+				end if;
+
+				E.SetPosition(X, Y);
+				null;
 			end if;
 		end loop;
 	end UpdateEnemies;
@@ -61,7 +80,7 @@ package body Game is
 
 		for E of Self.enemies loop
 			if E.IsAlive then
-				Renderer.DrawEnemy(E.GetPosition);
+				Renderer.DrawEnemy(E.GetX, E.GetY);
 			end if;
 		end loop;
 
