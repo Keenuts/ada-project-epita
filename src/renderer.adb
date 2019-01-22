@@ -85,7 +85,7 @@ package body Renderer is
 			Y_Bg        => Natural(PY),
 			Width       => ENEMY_Buffer.Width,
 			Height      => ENEMY_Buffer.Height,
-			Synchronous => True
+			Synchronous => False
 		);
 	end DrawEnemy;
 
@@ -113,7 +113,7 @@ package body Renderer is
 			Y_Bg        => Natural(PY),
 			Width       => PLAYER_Buffer.Width,
 			Height      => PLAYER_Buffer.Height,
-			Synchronous => True
+			Synchronous => False
 		);
 	end DrawPlayer;
 
@@ -140,6 +140,7 @@ package body Renderer is
 
 	procedure Flip is
 	begin
+		STM32.DMA2D.DMA2D_Wait_Transfer;
 		Display.Update_Layers;
 	end Flip;
 
