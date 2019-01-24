@@ -32,7 +32,8 @@ package body Entity is
 	procedure Init(Self : in out Entity'Class;
 		       X : Renderer.RangedPos;
 		       Y : Renderer.RangedPos;
-		       Size : Positive) is
+		       Size : Positive;
+		       Direction : Vector := (0.0, 0.0)) is
 	begin
 		Self.Alive := True;
 		Self.Id := InternalId;
@@ -40,6 +41,18 @@ package body Entity is
 		Self.X := X;
 		Self.Y := Y;
 		Self.Size := Size;
+		Self.Direction := Direction;
+	end Init;
+
+	procedure Init(Self : in out Particle;
+		       X : Renderer.RangedPos;
+		       Y : Renderer.RangedPos;
+		       Size : Positive;
+		       Player : Boolean;
+		       Direction : Vector := (0.0, 0.0)) is
+	begin
+		Init(Entity(Self), X, Y, Size, Direction);
+		Self.Player := Player;
 	end Init;
 
 	procedure SetPosition(Self : in out Entity'Class;
@@ -60,9 +73,18 @@ package body Entity is
 		return Self.Y;
 	end GetY;
 
+	function GetDirection(Self : in Entity'Class) return Vector is
+	begin
+		return Self.Direction;
+	end GetDirection;
+
 	function "="(A, B : in Entity'Class) return Boolean is
 	begin
 		return A.Id = B.Id;
 	end "=";
 
+	function IsPlayer(Self : in Particle) return Boolean is
+	begin
+		return Self.Player;
+	end IsPlayer;
 end Entity;

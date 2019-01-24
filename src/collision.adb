@@ -24,10 +24,15 @@ package body Collision is
 	procedure CollideParticle(ctx : in out GameAccess; P : in out Particle) is
 		A, B : Rect;
 	begin
+		B := P.getAABB;
+		A := ctx.player.getAABB;
+		if CollideAABB(A, B) then
+			ctx.CollisionCallback(P, ctx.player);
+			return;
+		end if;
 		for E of ctx.enemies loop
 			if E.IsAlive then
 				A := E.getAABB;
-				B := P.getAABB;
 				if CollideAABB(A, B) then
 					ctx.CollisionCallback(P, E);
 				end if;
@@ -44,9 +49,22 @@ package body Collision is
 		end loop;
 	end CollideParticles;
 
+	procedure CollidePlayer(ctx : in out GameAccess) is
+		A, B : Rect;
+	begin
+		A := ctx.player.getAABB;
+		for E of ctx.enemies loop
+			B := E.getAABB;
+			if CollideAABB(A, B) then
+				ctx.CollisionCallback(ctx.player, E);
+			end if;
+		end loop;
+	end CollidePlayer;
+
 	procedure CollideObjects(ctx : in out GameAccess) is
 	begin
 		CollideParticles(ctx);
+		CollidePlayer(ctx);
 	end CollideObjects;
 
 end Collision;

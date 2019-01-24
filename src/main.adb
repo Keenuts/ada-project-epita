@@ -41,7 +41,7 @@ is
 
 	procedure MiddleTouch(game : in out GameAccess; Weight : in Natural) is
 	begin
-		game.FireParticle;
+		game.PlayerShoot;
 	end;
 
 	procedure UserButton(game : in out GameAccess; Weight : in Natural) is
@@ -83,6 +83,7 @@ begin
 	Timer_GameAccess.Initialize;
 	Timer_GameAccess.RegisterInterval(Milliseconds(250), UpdateEnemies'Access, game);
 	Timer_GameAccess.RegisterInterval(Milliseconds(10), UpdateParticles'Access, game);
+	Timer_GameAccess.RegisterInterval(Seconds(1), RandomEnemyShoot'Access, game);
 
 	while not game.GameEnded loop
 		Input_GameAccess.Poll;

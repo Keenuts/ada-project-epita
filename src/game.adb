@@ -1,4 +1,5 @@
 with HAL.Bitmap; use HAL.Bitmap;
+with Ada.Numerics.Discrete_Random;
 
 package body Game is
 
@@ -64,13 +65,19 @@ package body Game is
 	end UpdateEnemies;
 
 	procedure UpdateParticles(Self : in out GameAccess) is
+		X, Y : Renderer.RangedPos;
 	begin
 		for P of Self.particles loop
 			if P.IsAlive then
-				if P.GetY = RangedPos'First then
+				if P.GetY = RangedPos'First or else
+				   P.GetY = RangedPos'Last then
 					P.Dead;
 				else
-					P.SetPosition(P.GetX, P.GetY - 1);
+					X := Renderer.RangedPos(Float(P.GetX) +
+						Float'Floor(P.GetDirection.X));
+					Y := Renderer.RangedPos(Float(P.GetY) +
+						Float'Floor(P.GetDirection.Y));
+					P.SetPosition(X, Y);
 				end if;
 
 			end if;
@@ -116,7 +123,7 @@ package body Game is
 		return RangedPos(PX);
 	end Transform_RangedPos;
 
-	procedure FireParticle(Self : in out GameContext) is
+	procedure PlayerShoot(Self : in out GameContext) is
 	begin
 		-- particle fire rate is limited
 		if Self.lastParticleSpawn + PARTICLE_FIRE_DELAY > clock then
@@ -128,7 +135,9 @@ package body Game is
 				P.Init(
 					Transform_RangedPos(Self.player.GetX, PLAYER_SPRITE_SIZE, PARTICLE_SIZE),
 					Transform_RangedPos(Self.player.GetY, PLAYER_SPRITE_SIZE, PARTICLE_SIZE),
-					PARTICLE_SIZE
+					PARTICLE_SIZE,
+					True,
+					(0.0, -1.0)
 				);
 				Self.lastParticleSpawn := clock;
 
@@ -138,7 +147,31 @@ package body Game is
 				exit;
 			end if;
 		end loop;
-	end FireParticle;
+	end PlayerShoot;
+
+	procedure RandomEnemyShoot(Self : in out GameAccess) is
+		package Rand is new Ada.Numerics.Discrete_Random(EnemyRange);
+		Gen : Rand.Generator;
+		E : Enemy;
+	begin
+		Rand.Reset(Gen);
+		loop
+			E := Self.enemies(Rand.Random(Gen));
+			exit when E.IsAlive;
+		end loop;
+		for P of Self.particles loop
+			if not P.IsAlive then
+				P.Init(
+					Transform_RangedPos(E.GetX, ENEMY_SPRITE_SIZE, PARTICLE_SIZE),
+					Transform_RangedPos(E.GetY, ENEMY_SPRITE_SIZE, PARTICLE_SIZE),
+					PARTICLE_SIZE,
+					False,
+					(0.0, 1.0)
+				);
+				exit;
+			end if;
+		end loop;
+	end RandomEnemyShoot;
 
 	procedure PlayerMoveLeft(Self : in out GameContext) is
 	begin
@@ -164,9 +197,30 @@ package body Game is
 				  A : in out Particle;
 				  B : in out Enemy) is
 	begin
+		if not A.IsPlayer then
+			return;
+		end if;
 		B.Dead;
 		A.Dead;
 		Self.score := Self.score + 1;
+	end HandleCollision;
+
+	procedure HandleCollision(Self : in out GameContext;
+				  A : in out Particle;
+				  B : in out Player) is
+	begin
+		if A.IsPlayer then -- Should never happend
+			return;
+		end if;
+		B.Dead;
+		A.Dead;
+	end HandleCollision;
+
+	procedure HandleCollision(Self : in out GameContext;
+				  A : in out Player;
+				  B : in out Enemy) is
+	begin
+		A.Dead;
 	end HandleCollision;
 
 	procedure CollisionCallback(Self: in out GameContext;
@@ -175,6 +229,12 @@ package body Game is
 	begin
 		if A in Particle'Class and B in Enemy'Class then
 			Self.HandleCollision(Particle(A), Enemy(B));
+		end if;
+		if A in Player'Class and B in Enemy'Class then
+			Self.HandleCollision(Player(A), Enemy(B));
+		end if;
+		if A in Particle'Class and B in Player'Class then
+			Self.HandleCollision(Particle(A), Player(B));
 		end if;
 	end CollisionCallback;
 end Game;
