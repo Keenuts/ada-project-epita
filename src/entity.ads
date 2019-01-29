@@ -15,14 +15,16 @@ package Entity is
 
 	procedure InitializeEntity(Self: in out Entity'Class);
 	function IsAlive(Self: in Entity'Class) return Boolean;
-	procedure Dead(Self: in out Entity'Class);
+	procedure Dead(Self: in out Entity'Class)
+		with Post => Self.IsAlive = False; -- LLR.9
 
 	-- Initialization functions
 	procedure Init(Self : in out Entity'Class;
 		       X : Renderer.RangedPos;
 		       Y : Renderer.RangedPos;
 		       Size : Positive;
-		       Direction : Vector := (0.0, 0.0));
+		       Direction : Vector := (0.0, 0.0))
+		with Post => Self.IsAlive = True; -- LLR.10.1
 	procedure Init(Self : in out Particle;
 		       X : Renderer.RangedPos;
 		       Y : Renderer.RangedPos;
@@ -33,7 +35,8 @@ package Entity is
 	-- Setters
 	procedure SetPosition(Self : in out Entity'Class;
 			      X : Renderer.RangedPos;
-			      Y : Renderer.RangedPos);
+			      Y : Renderer.RangedPos)
+		with Post => Self.GetX = X and Self.GetY = Y; -- LLR.12
 
 	-- Getters
 	function GetX(Self : in Entity'Class) return Renderer.RangedPos;
