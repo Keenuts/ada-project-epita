@@ -33,7 +33,11 @@ package Game is
 	procedure UpdateEnemies(Self : in out GameAccess);
 	procedure UpdateParticles(Self : in out GameAccess);
 	procedure DrawFrame(Self : in out GameContext);
-	function GameEnded(Self : in out GameContext) return Boolean;
+	function GameEnded(Self : in out GameContext) return Boolean
+	with Contract_Cases =>
+		(not Self.player.IsAlive 		       => GameEnded'Result = true,
+		(for all J of Self.enemies => (not J.IsAlive)) => GameEnded'Result = true,
+		others 					       => GameEnded'Result = false);
 	procedure CollisionCallback(Self : in out GameContext;
 				    A : in out Entity.Entity'Class;
 				    B : in out Entity.Entity'Class);
@@ -42,8 +46,10 @@ package Game is
 	-- They might be plugged with whatever user input desired
 	procedure PlayerShoot(Self : in out GameContext);
 	procedure RandomEnemyShoot(Self : in out GameAccess);
-	procedure PlayerMoveLeft(Self : in out GameContext);
-	procedure PlayerMoveRight(Self : in out GameContext);
+	procedure PlayerMoveLeft(Self : in out GameContext)
+		with Post => Self.player.GetY /= Renderer.RangedPos'Last;
+	procedure PlayerMoveRight(Self : in out GameContext)
+		with Post => Self.player.GetY /= Renderer.RangedPos'First;
 
 private
 
